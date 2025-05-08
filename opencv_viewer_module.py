@@ -8,6 +8,8 @@ import cv2
 from collections import deque
 from threading import Thread
 import time
+import os
+import sys
 from roi_utils import fetch_all_rois, draw_rois
 from thermal_receiver import ThermalReceiver
 from PyQt5 import uic
@@ -17,6 +19,13 @@ DELAY_SEC = 1
 DEFAULT_IP   = "192.168.0.56"
 DEFAULT_PORT = "554"
 THERMAL_PORT = 60110
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 class FrameReader(Thread):
     def __init__(self, url, delay_sec):
@@ -57,7 +66,7 @@ class FrameReader(Thread):
 class OpenCVViewer(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi("viewer.ui", self)
+        uic.loadUi(resource_path("viewer.ui"), self)
 
         # 내부 상태 초기화
         self.reader = None
