@@ -66,6 +66,13 @@ class OpenCVViewer(QMainWindow):
 
         # ROI 라벨 테이블 구성
         grid_layout = self.roi_grid.layout()
+
+        # 🔼 헤더 추가
+        grid_layout.addWidget(QLabel("영역"), 0, 0)
+        grid_layout.addWidget(QLabel("Max"), 0, 1)
+        grid_layout.addWidget(QLabel("Min"), 0, 2)
+        grid_layout.addWidget(QLabel("Avg"), 0, 3)
+
         for i in range(10):
             max_lbl = QLabel("-")
             min_lbl = QLabel("-")
@@ -93,7 +100,6 @@ class OpenCVViewer(QMainWindow):
         self.resolution_shown = False
         self.rois = fetch_all_rois(ip)
 
-        # 🔧 열화상 수신도 UI 입력된 IP를 사용
         self.receiver = ThermalReceiver(ip, THERMAL_PORT, self.thermal_data)
         self.receiver.start()
 
