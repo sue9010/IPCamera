@@ -54,6 +54,22 @@ def draw_rois(frame, rois, thermal_data=None):
             cv2.LINE_AA
         )
 
+        # 🔴 draw max/min points if available
+        if thermal_data and idx in thermal_data:
+            td = thermal_data[idx]
+
+            # max point (빨간색)
+            if td.get("point_max_x") is not None and td.get("point_max_y") is not None:
+                x_max, y_max = int(td["point_max_x"]), int(td["point_max_y"])
+                cv2.rectangle(frame, (x_max, y_max), (x_max + 2, y_max + 2), (0, 0, 255), -1)
+
+            # min point (파란색)
+            if td.get("point_min_x") is not None and td.get("point_min_y") is not None:
+                x_min, y_min = int(td["point_min_x"]), int(td["point_min_y"])
+                cv2.rectangle(frame, (x_min, y_min), (x_min + 2, y_min + 2), (255, 0, 0), -1)
+
+
+
 
 def load_latest_roi_temps(file_path='thermal_camera_data.txt'):
     results = {}

@@ -127,7 +127,7 @@ class OpenCVViewer(QMainWindow):
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
                 if self.rois:
-                    draw_rois(rgb, self.rois)
+                    draw_rois(rgb, self.rois, self.thermal_data)
 
                 for i in range(10):
                     temp = self.thermal_data.get(i)

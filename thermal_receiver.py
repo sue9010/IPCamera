@@ -8,7 +8,7 @@ class ThermalReceiver(threading.Thread):
         super().__init__(daemon=True)
         self.host = host
         self.port = port
-        self.data_store = data_store  # dict to store area_id -> {temp_max, temp_min, temp_avr}
+        self.data_store = data_store  # area_id -> {온도 + 좌표 포함}
         self.running = False
 
     def run(self):
@@ -35,7 +35,11 @@ class ThermalReceiver(threading.Thread):
                                 self.data_store[area_id] = {
                                     "max": item.get("temp_max", "-"),
                                     "min": item.get("temp_min", "-"),
-                                    "avr": item.get("temp_avr", "-")
+                                    "avr": item.get("temp_avr", "-"),
+                                    "point_max_x": item.get("point_max_x"),
+                                    "point_max_y": item.get("point_max_y"),
+                                    "point_min_x": item.get("point_min_x"),
+                                    "point_min_y": item.get("point_min_y")
                                 }
                     except Exception as e:
                         print(f"[ThermalReceiver] Parse error: {e}")
