@@ -45,8 +45,8 @@ def draw_rois(frame, rois, thermal_data=None, scale_x=1.0, scale_y=1.0):
         # Draw rectangle
         cv2.rectangle(frame, (sx_r, sy_r), (ex_r, ey_r), (0, 255, 0), 1)
 
-        # Label position
-        label_pos = (sx_r + 2, sy_r - 5 if sy_r - 5 > 0 else sy_r + 12)
+        # Label position (우측 하단 내부)
+        label_pos = (ex_r - 35, ey_r - 5)
         cv2.putText(
             frame,
             f"ROI{idx}",
@@ -62,17 +62,38 @@ def draw_rois(frame, rois, thermal_data=None, scale_x=1.0, scale_y=1.0):
         if thermal_data and idx in thermal_data:
             td = thermal_data[idx]
 
-            # max point (빨간색)
-            if td.get("point_max_x") is not None and td.get("point_max_y") is not None:
-                x_max = int(td["point_max_x"] * scale_x)
-                y_max = int(td["point_max_y"] * scale_y)
-                cv2.rectangle(frame, (x_max, y_max), (x_max + 4, y_max + 4), (255, 0, 0), -1)
+            # 온도 텍스트 (좌측 상단 내부)
+            temp_lines = [
+                f"Max: {td['max']}",
+                f"Min: {td['min']}",
+                f"Avg: {td['avr']}"
+            ]
+            font_scale = 0.4
+            line_height = int(35 * font_scale)
 
-            # min point (파란색)
+            for i, line in enumerate(temp_lines):
+                cv2.putText(
+                    frame,
+                    line,
+                    (sx_r + 3, sy_r + 15 + i * line_height),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    font_scale,
+                    (255, 255, 255),
+                    1,
+                    cv2.LINE_AA
+                )
+
+            # 원래 min 위치가 사실 max임 → 빨간색
             if td.get("point_min_x") is not None and td.get("point_min_y") is not None:
-                x_min = int(td["point_min_x"] * scale_x)
-                y_min = int(td["point_min_y"] * scale_y)
-                cv2.rectangle(frame, (x_min, y_min), (x_min + 4, y_min + 4), (0, 0, 255), -1)
+                x_max = int(td["point_min_x"] * scale_x)
+                y_max = int(td["point_min_y"] * scale_y)
+                cv2.rectangle(frame, (x_max, y_max), (x_max + 4, y_max + 4), (0, 0, 255), -1)  # 🔴
+
+            # 원래 max 위치가 사실 min임 → 파란색
+            if td.get("point_max_x") is not None and td.get("point_max_y") is not None:
+                x_min = int(td["point_max_x"] * scale_x)
+                y_min = int(td["point_max_y"] * scale_y)
+                cv2.rectangle(frame, (x_min, y_min), (x_min + 4, y_min + 4), (255, 0, 0), -1)  # 🔵
 
 
 def load_latest_roi_temps(file_path='thermal_camera_data.txt'):
