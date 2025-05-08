@@ -40,7 +40,7 @@
        <item>
         <widget class="QLineEdit" name="ip_input">
          <property name="text">
-          <string>192.168.0.56</string>
+          <string>192.168.0.57</string>
          </property>
         </widget>
        </item>

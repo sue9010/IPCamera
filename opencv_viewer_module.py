@@ -15,7 +15,6 @@ from PyQt5 import uic
 DELAY_SEC = 1
 DEFAULT_IP   = "192.168.0.56"
 DEFAULT_PORT = "554"
-THERMAL_HOST = DEFAULT_IP
 THERMAL_PORT = 60110
 
 class FrameReader(Thread):
@@ -94,7 +93,8 @@ class OpenCVViewer(QMainWindow):
         self.resolution_shown = False
         self.rois = fetch_all_rois(ip)
 
-        self.receiver = ThermalReceiver(THERMAL_HOST, THERMAL_PORT, self.thermal_data)
+        # 🔧 열화상 수신도 UI 입력된 IP를 사용
+        self.receiver = ThermalReceiver(ip, THERMAL_PORT, self.thermal_data)
         self.receiver.start()
 
         QTimer.singleShot(5000, self.check_stream_timeout)
@@ -119,15 +119,24 @@ class OpenCVViewer(QMainWindow):
         if self.reader:
             frame = self.reader.get_delayed()
             if frame is not None:
+                original_h, original_w = frame.shape[:2]
+
                 if not self.resolution_shown:
-                    h, w = frame.shape[:2]
-                    self.resolution_label.setText(f"해상도: {w}×{h}")
+                    self.resolution_label.setText(f"해상도: {original_w}×{original_h}")
                     self.resolution_shown = True
+
+                if (original_w, original_h) != (640, 480):
+                    resized_w, resized_h = 640, 480
+                    scale_x = resized_w / original_w
+                    scale_y = resized_h / original_h
+                    frame = cv2.resize(frame, (resized_w, resized_h))
+                else:
+                    scale_x = scale_y = 1.0
 
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
                 if self.rois:
-                    draw_rois(rgb, self.rois, self.thermal_data)
+                    draw_rois(rgb, self.rois, self.thermal_data, scale_x, scale_y)
 
                 for i in range(10):
                     temp = self.thermal_data.get(i)
