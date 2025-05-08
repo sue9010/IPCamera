@@ -42,7 +42,6 @@ class FrameReader(Thread):
         if self.cap.isOpened():
             self.cap.release()
 
-
     def get_delayed(self):
         if not self.running or not self.cap.isOpened():
             return None
@@ -64,7 +63,6 @@ class OpenCVViewer(QMainWindow):
         self.receiver = None
         self.thermal_data = {}  # area_id -> {max, min, avr}
         self.rois = []
-        self.resolution_shown = False
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
         self.roi_label_matrix = []
@@ -102,11 +100,13 @@ class OpenCVViewer(QMainWindow):
         rtsp_url = f"rtsp://{ip}:{port}/stream1"
 
         self.stop_stream()
+
+        self.video_label.setText("연결중...")
+        self.video_label.repaint()
+
         self.reader = FrameReader(rtsp_url, DELAY_SEC)
         self.reader.start()
         self.timer.start(33)
-        self.resolution_label.setText("해상도: -")
-        self.resolution_shown = False
         self.rois = fetch_all_rois(ip)
 
         self.receiver = ThermalReceiver(ip, THERMAL_PORT, self.thermal_data)
@@ -128,17 +128,12 @@ class OpenCVViewer(QMainWindow):
             self.receiver.stop()
             self.receiver = None
         self.video_label.clear()
-        self.resolution_label.setText("해상도: -")
 
     def update_frame(self):
         if self.reader:
             frame = self.reader.get_delayed()
             if frame is not None:
                 original_h, original_w = frame.shape[:2]
-
-                if not self.resolution_shown:
-                    self.resolution_label.setText(f"해상도: {original_w}×{original_h}")
-                    self.resolution_shown = True
 
                 if (original_w, original_h) != (640, 480):
                     resized_w, resized_h = 640, 480

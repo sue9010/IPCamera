@@ -94,26 +94,3 @@ def draw_rois(frame, rois, thermal_data=None, scale_x=1.0, scale_y=1.0):
                 x_min = int(td["point_max_x"] * scale_x)
                 y_min = int(td["point_max_y"] * scale_y)
                 cv2.rectangle(frame, (x_min, y_min), (x_min + 4, y_min + 4), (255, 0, 0), -1)  # 🔵
-
-
-def load_latest_roi_temps(file_path='thermal_camera_data.txt'):
-    results = {}
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        matches = re.findall(r'\[\s*{.*?}\s*\]', content, re.DOTALL)
-        if not matches:
-            return results
-        last_block = matches[-1]
-        data_list = json.loads(last_block)
-        for entry in data_list:
-            area_id = entry.get("area_id")
-            if area_id is not None:
-                results[area_id] = {
-                    "max": entry.get("temp_max", "-"),
-                    "min": entry.get("temp_min", "-"),
-                    "avr": entry.get("temp_avr", "-")
-                }
-    except Exception:
-        pass
-    return results
