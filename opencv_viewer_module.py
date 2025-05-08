@@ -29,20 +29,29 @@ class FrameReader(Thread):
 
     def run(self):
         while self.running:
+            if not self.cap.isOpened():
+                break
             ret, frame = self.cap.read()
+            if not self.running:
+                break
             if ret:
                 self.frames.append(frame)
             else:
                 time.sleep(0.01)
 
+        if self.cap.isOpened():
+            self.cap.release()
+
+
     def get_delayed(self):
+        if not self.running or not self.cap.isOpened():
+            return None
         if len(self.frames) == self.frames.maxlen:
             return self.frames[0]
         return None
 
     def stop(self):
         self.running = False
-        self.cap.release()
 
 
 class OpenCVViewer(QMainWindow):
