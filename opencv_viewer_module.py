@@ -94,6 +94,11 @@ class OpenCVViewer(QMainWindow):
                 "avr": avr_lbl
             })
 
+    def refresh_rois(self):
+        ip = self.ip_input.text().strip()
+        self.rois = fetch_all_rois(ip)
+        print("[OpenCVViewer] ROI 갱신됨")
+
     def start_stream(self):
         ip = self.ip_input.text().strip()
         port = self.port_input.text().strip()
@@ -109,7 +114,7 @@ class OpenCVViewer(QMainWindow):
         self.timer.start(33)
         self.rois = fetch_all_rois(ip)
 
-        self.receiver = ThermalReceiver(ip, THERMAL_PORT, self.thermal_data)
+        self.receiver = ThermalReceiver(ip, THERMAL_PORT, self.thermal_data, self.refresh_rois)
         self.receiver.start()
 
         QTimer.singleShot(5000, self.check_stream_timeout)

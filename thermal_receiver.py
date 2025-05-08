@@ -4,12 +4,13 @@ import json
 import time
 
 class ThermalReceiver(threading.Thread):
-    def __init__(self, host, port, data_store):
+    def __init__(self, host, port, data_store, on_roi_refresh=None):
         super().__init__(daemon=True)
         self.host = host
         self.port = port
-        self.data_store = data_store  # area_id -> {온도 + 좌표 포함}
+        self.data_store = data_store
         self.running = False
+        self.on_roi_refresh = on_roi_refresh  # ← ROI 변경 시 호출할 함수
 
     def run(self):
         self.running = True
@@ -31,7 +32,9 @@ class ThermalReceiver(threading.Thread):
                         json_data = json.loads(decoded)
                         for item in json_data:
                             area_id = item.get("area_id")
-                            if area_id is not None:
+                            if area_id == 100 and self.on_roi_refresh:
+                                self.on_roi_refresh()  # 🔁 ROI 갱신 트리거
+                            elif area_id is not None:
                                 self.data_store[area_id] = {
                                     "max": item.get("temp_max", "-"),
                                     "min": item.get("temp_min", "-"),
@@ -43,7 +46,6 @@ class ThermalReceiver(threading.Thread):
                                 }
                     except Exception as e:
                         print(f"[ThermalReceiver] Parse error: {e}")
-                        continue
         except Exception as e:
             print(f"[ThermalReceiver] Connection error: {e}")
 
