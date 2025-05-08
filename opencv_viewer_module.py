@@ -11,6 +11,7 @@ import time
 from roi_utils import fetch_all_rois, draw_rois
 from thermal_receiver import ThermalReceiver
 from PyQt5 import uic
+from ip_selector_popup import IPSelectorPopup
 
 DELAY_SEC = 1
 DEFAULT_IP   = "192.168.0.56"
@@ -70,6 +71,7 @@ class OpenCVViewer(QMainWindow):
         # 버튼 연결
         self.start_button.clicked.connect(self.start_stream)
         self.stop_button.clicked.connect(self.stop_stream)
+        self.search_button.clicked.connect(self.open_ip_selector)
 
         # ROI 라벨 테이블 구성
         grid_layout = self.roi_grid.layout()
@@ -93,6 +95,13 @@ class OpenCVViewer(QMainWindow):
                 "min": min_lbl,
                 "avr": avr_lbl
             })
+
+    def open_ip_selector(self):
+        popup = IPSelectorPopup(self)
+        if popup.exec_() == popup.Accepted:
+            selected_ip = popup.get_selected_ip()
+            if selected_ip:
+                self.ip_input.setText(selected_ip)
 
     def refresh_rois(self):
         ip = self.ip_input.text().strip()
