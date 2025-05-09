@@ -24,7 +24,7 @@ class SetROIPopup(QDialog):
         self.save_button = self.findChild(QPushButton, "btn_save")
         if self.save_button:
             self.save_button.clicked.connect(self.save_all_rois)
-
+        
         self.frame_original = None
         self.load_rtsp_frame()
         self.load_roi_data()
@@ -82,6 +82,7 @@ class SetROIPopup(QDialog):
                 # is_used → QCheckBox
                 chk = QCheckBox()
                 chk.setChecked(data.get("roi_use", "off") == "on")
+                chk.stateChanged.connect(self.draw_rois_on_image) 
                 chk_widget = QWidget()
                 layout = QHBoxLayout(chk_widget)
                 layout.addWidget(chk)
@@ -129,6 +130,13 @@ class SetROIPopup(QDialog):
                 endy = int(self.roi_table.item(row, 4).text())
 
                 cv2.rectangle(frame, (startx, starty), (endx, endy), (0, 255, 0), 1)
+
+                # 가운데에 ROI 번호 출력
+                cx = (startx + endx) // 2
+                cy = (starty + endy) // 2
+                cv2.putText(frame, f"{row}", (cx - 10, cy),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
+                
             except Exception as e:
                 print(f"[ROI {row}] 그리기 실패:", e)
 
