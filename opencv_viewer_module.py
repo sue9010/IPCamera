@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import (
     QMainWindow, QLabel, QLineEdit, QPushButton,
     QVBoxLayout, QHBoxLayout, QWidget, QGridLayout, QMessageBox
 )
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtGui import QImage, QPixmap, QColor
 from PyQt5.QtCore import QTimer
 import cv2
 from collections import deque
@@ -198,11 +198,40 @@ class OpenCVViewer(QMainWindow):
 
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
+                # ✅ 알람이 발생한 ROI 목록 판단
+                alarming_map = {i: [] for i in range(10)}  # {roi_idx: ["max", "min", "avr"]}
+                mode_map = {
+                    "maximum": "max",
+                    "minimum": "min",
+                    "average": "avr"
+                }
+
+                for i in range(10):
+                    roi = self.rois[i] if i < len(self.rois) else None
+                    td = self.thermal_data.get(i)
+                    if not roi or not td:
+                        continue
+                    alarm = roi.get("alarm", {})
+                    if alarm.get("alarm_use") == "on" and alarm.get("condition") in ("above", "below") and alarm.get("temperature"):
+                        try:
+                            threshold = float(alarm["temperature"])
+                            mode = alarm.get("mode", "maximum")
+                            key = mode_map.get(mode)
+                            if key and key in td:
+                                temp = float(td[key])
+                                if (alarm["condition"] == "above" and temp > threshold) or \
+                                (alarm["condition"] == "below" and temp < threshold):
+                                    alarming_map[i].append(key)
+                        except:
+                            continue
+
                 if self.rois:
                     draw_rois(rgb, self.rois, self.thermal_data, scale_x, scale_y)
 
+                # ROI 라벨 갱신 + 데이터 표시 강조
                 for i in range(10):
                     temp = self.thermal_data.get(i)
+                    alerts = alarming_map.get(i, [])
                     if temp:
                         self.roi_label_matrix[i]["max"].setText(f"{temp['max']}℃")
                         self.roi_label_matrix[i]["min"].setText(f"{temp['min']}℃")
@@ -212,9 +241,14 @@ class OpenCVViewer(QMainWindow):
                         self.roi_label_matrix[i]["min"].setText("-")
                         self.roi_label_matrix[i]["avr"].setText("-")
 
+                    self.roi_label_matrix[i]["max"].setStyleSheet("background-color: rgb(255, 128, 128);" if "max" in alerts else "")
+                    self.roi_label_matrix[i]["min"].setStyleSheet("background-color: rgb(255, 128, 128);" if "min" in alerts else "")
+                    self.roi_label_matrix[i]["avr"].setStyleSheet("background-color: rgb(255, 128, 128);" if "avr" in alerts else "")
+
                 h, w, ch = rgb.shape
                 qimg = QImage(rgb.data, w, h, ch * w, QImage.Format_RGB888)
                 self.video_label.setPixmap(QPixmap.fromImage(qimg))
+
 
     def open_graph_viewer(self):
         ip = self.ip_input.text().strip()

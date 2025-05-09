@@ -22,23 +22,34 @@ def evaluate_alarms(rois, thermal_data):
         use = alarm.get("alarm_use")
         condition = alarm.get("condition")
         threshold = alarm.get("temperature")
+        mode = alarm.get("mode", "maximum")  # maximum, minimum, average
 
         if use != "on" or condition not in ("above", "below") or threshold is None:
             continue
 
         try:
             threshold = float(threshold)
-            temp = thermal_data.get(idx, {}).get("max")
-            if temp is None:
+            data_entry = thermal_data.get(idx, {})
+
+            mode_key = {
+                "maximum": "max",
+                "minimum": "min",
+                "average": "avr"
+            }.get(mode)
+
+            if not mode_key or mode_key not in data_entry:
                 continue
-            temp = float(temp)
+
+            temp = float(data_entry[mode_key])
 
             if condition == "above" and temp > threshold:
-                print(f"[알람] ROI{idx}: 온도 {temp}℃ > 기준 {threshold}℃")
+                print(f"[알람] ROI{idx}: {mode} {temp}℃ > 기준 {threshold}℃")
             elif condition == "below" and temp < threshold:
-                print(f"[알람] ROI{idx}: 온도 {temp}℃ < 기준 {threshold}℃")
+                print(f"[알람] ROI{idx}: {mode} {temp}℃ < 기준 {threshold}℃")
+
         except Exception as e:
             print(f"[에러] ROI{idx} 알람 판별 중 오류: {e}")
+
 
 
 if __name__ == "__main__":

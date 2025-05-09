@@ -62,6 +62,27 @@ def draw_rois(frame, rois, thermal_data=None, scale_x=1.0, scale_y=1.0):
 
         sx_r, sy_r, ex_r, ey_r = map(lambda v: int(v[0] * v[1]), zip((sx, sy, ex, ey), (scale_x, scale_y, scale_x, scale_y)))
 
+        # 알람 여부 판단
+        alert_triggered = False
+        if thermal_data and idx in thermal_data and isinstance(roi, dict):
+            td = thermal_data[idx]
+            alarm = roi.get("alarm", {})
+            if alarm.get("alarm_use") == "on" and alarm.get("condition") in ("above", "below") and alarm.get("temperature"):
+                try:
+                    threshold = float(alarm["temperature"])
+                    temp = float(td["max"])
+                    if (alarm["condition"] == "above" and temp > threshold) or \
+                       (alarm["condition"] == "below" and temp < threshold):
+                        alert_triggered = True
+                except:
+                    pass
+
+        if alert_triggered:
+            overlay = frame.copy()
+            cv2.rectangle(overlay, (sx_r, sy_r), (ex_r, ey_r), (255, 0, 0), -1)  # 빨간색 채우기
+            cv2.addWeighted(overlay, 0.3, frame, 0.7, 0, frame)
+
+        # 테두리
         cv2.rectangle(frame, (sx_r, sy_r), (ex_r, ey_r), (0, 255, 0), 1)
 
         label_pos = (ex_r - 35, ey_r - 5)
