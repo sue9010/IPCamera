@@ -53,6 +53,7 @@ class GraphCanvas(FigureCanvas):
         self._dragging = False
         self._drag_start = None
         self._drag_end = None
+        self._highlight = None
 
         self.mpl_connect("button_press_event", self.on_press)
         self.mpl_connect("motion_notify_event", self.on_motion)
@@ -101,8 +102,16 @@ class GraphCanvas(FigureCanvas):
     def on_motion(self, event):
         if self._dragging and event.inaxes == self.ax:
             self._drag_end = event.xdata
+            x1, x2 = sorted([self._drag_start, self._drag_end])
+            if self._highlight:
+                self._highlight.remove()
+            self._highlight = self.ax.axvspan(x1, x2, color='gray', alpha=0.3)
+            self.draw()
 
     def on_release(self, event):
+        if self._highlight:
+            self._highlight.remove()
+            self._highlight = None
         if self._dragging and self._drag_start is not None and self._drag_end is not None:
             x1, x2 = sorted([self._drag_start, self._drag_end])
             if abs(x2 - x1) >= 1:
