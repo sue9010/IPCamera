@@ -1,4 +1,3 @@
-# Camera_Control/nuc.py
 from PyQt5.QtWidgets import (
     QDialog, QVBoxLayout, QFormLayout, QComboBox, QPushButton, QMessageBox
 )
@@ -16,8 +15,13 @@ class NUCControlPopup(QDialog):
         self.nuc_mode = QComboBox()
         self.nuc_mode.addItems(["off", "time", "auto", "timeauto"])
 
+        # 초 단위 실제 값
+        self.nuc_time_seconds = ["0", "60", "120", "180", "240", "300", "600", "1200", "1800", "3600"]
+        # UI 표시: 분 단위
         self.nuc_time = QComboBox()
-        self.nuc_time.addItems(["0", "60", "120", "180", "240", "300", "600", "1200", "1800", "3600"])
+        self.nuc_time.addItems(
+            [f"{int(int(s) // 60)}분" if s != "0" else "0분" for s in self.nuc_time_seconds]
+        )
 
         self.nuc_sens = QComboBox()
         self.nuc_sens.addItems(["lowest", "low", "middle", "high", "highest"])
@@ -68,19 +72,21 @@ class NUCControlPopup(QDialog):
                     except ValueError:
                         print("[경고] 파싱 실패:", line)
 
-            # ▼ 항목 매핑: 존재하는 값만 반영
+            # ▼ nucmode
             nucmode_val = data.get("nucmode", "off")
             if nucmode_val in [self.nuc_mode.itemText(i) for i in range(self.nuc_mode.count())]:
                 self.nuc_mode.setCurrentText(nucmode_val)
             else:
                 self.nuc_mode.setCurrentIndex(0)
 
+            # ▼ nuctime (초 → index 매핑)
             nuctime_val = data.get("nuctime", "60")
-            if nuctime_val in [self.nuc_time.itemText(i) for i in range(self.nuc_time.count())]:
-                self.nuc_time.setCurrentText(nuctime_val)
+            if nuctime_val in self.nuc_time_seconds:
+                self.nuc_time.setCurrentIndex(self.nuc_time_seconds.index(nuctime_val))
             else:
-                self.nuc_time.setCurrentIndex(1)  # default: 60
+                self.nuc_time.setCurrentIndex(1)  # default: 60s = 1분
 
+            # ▼ nucautosens
             nucsens_val = data.get("nucautosens", "middle")
             if nucsens_val in [self.nuc_sens.itemText(i) for i in range(self.nuc_sens.count())]:
                 self.nuc_sens.setCurrentText(nucsens_val)
@@ -90,8 +96,6 @@ class NUCControlPopup(QDialog):
         except Exception as e:
             QMessageBox.critical(self, "예외 발생", str(e))
 
-
-
     def apply_settings(self):
         url = f"http://{self.ip}/cgi-bin/control/camthermalfunc.cgi"
         params = {
@@ -99,7 +103,7 @@ class NUCControlPopup(QDialog):
             "passwd": self.user_pw,
             "action": "setthermalfunc",
             "nucmode": self.nuc_mode.currentText(),
-            "nuctime": self.nuc_time.currentText(),
+            "nuctime": self.nuc_time_seconds[self.nuc_time.currentIndex()],
             "nucautosens": self.nuc_sens.currentText()
         }
         try:
@@ -112,4 +116,4 @@ class NUCControlPopup(QDialog):
             QMessageBox.critical(self, "예외 발생", str(e))
 
     def nuc_once(self):
-        pass # TODO: NUC 즉시 실행 기능 추후 구현
+        pass  # TODO: NUC 즉시 실행 기능 추후 구현

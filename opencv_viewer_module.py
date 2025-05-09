@@ -188,13 +188,14 @@ class OpenCVViewer(QMainWindow):
 
         self.stop_button.setEnabled(connected)
         self.time_plot_button.setEnabled(connected)
+        self.nuc_button.setEnabled(connected)
 
         disabled_style = "background-color: lightgray; color: gray;"
         enabled_style = ""
 
         for widget in [self.start_button, self.search_button, self.ip_input, self.id_input, self.pw_input]:
             widget.setStyleSheet(enabled_style if widget.isEnabled() else disabled_style)
-        for widget in [self.stop_button, self.time_plot_button]:
+        for widget in [self.stop_button, self.time_plot_button, self.nuc_button]:
             widget.setStyleSheet(enabled_style if widget.isEnabled() else disabled_style)
 
     def open_ip_selector(self):
