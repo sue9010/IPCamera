@@ -1,5 +1,7 @@
 from roi_utils import fetch_all_rois
 
+# fetch_alarm_conditions는 메인 뷰어에서 영상이 연결될 때 1번,
+# 그리고 ROI가 갱신될 때마다 호출되어야 합니다.
 def fetch_alarm_conditions(ip, user_id, user_pw):
     rois = fetch_all_rois(ip, user_id, user_pw)
     if rois is None:
@@ -13,6 +15,7 @@ def fetch_alarm_conditions(ip, user_id, user_pw):
               f"온도: {alarm.get('temperature')}, 시작지연: {alarm.get('start_delay')}, 종료지연: {alarm.get('stop_delay')}")
     return rois
 
+# evaluate_alarms는 열화상 TCP/IP 수신 시마다 호출되어야 합니다.
 def evaluate_alarms(rois, thermal_data):
     for idx, roi in enumerate(rois):
         alarm = roi.get("alarm", {})

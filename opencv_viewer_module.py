@@ -12,6 +12,7 @@ import os
 import sys
 from roi_utils import fetch_all_rois, draw_rois
 from thermal_receiver import ThermalReceiver
+from alarm_utils import fetch_alarm_conditions  # 🔔 알람 조건 가져오기
 from PyQt5 import uic
 from ip_selector_popup import IPSelectorPopup
 from graph_viewer import GraphWindow
@@ -73,6 +74,7 @@ class OpenCVViewer(QMainWindow):
         self.receiver = None
         self.thermal_data = {}
         self.rois = []
+        self.roi_alarm_config = []  # 🔔 알람 조건 저장용
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
         self.roi_label_matrix = []
@@ -131,6 +133,7 @@ class OpenCVViewer(QMainWindow):
         user_id = self.id_input.text().strip()
         user_pw = self.pw_input.text().strip()
         self.rois = fetch_all_rois(ip, user_id, user_pw)
+        self.roi_alarm_config = fetch_alarm_conditions(ip, user_id, user_pw)  # 🔔 ROI 갱신 시 알람 조건도 다시 가져옴
         print("[OpenCVViewer] ROI 갱신됨")
 
     def start_stream(self):
@@ -141,6 +144,7 @@ class OpenCVViewer(QMainWindow):
         user_pw = self.pw_input.text().strip()
 
         self.rois = fetch_all_rois(ip, user_id, user_pw)
+        self.roi_alarm_config = fetch_alarm_conditions(ip, user_id, user_pw)
         if self.rois is None:
             QMessageBox.warning(self, "로그인 실패", "ID 또는 비밀번호가 올바르지 않습니다.")
             return
@@ -156,7 +160,7 @@ class OpenCVViewer(QMainWindow):
         self.reader.start()
         self.timer.start(33)
 
-        self.receiver = ThermalReceiver(ip, THERMAL_PORT, self.thermal_data, self.refresh_rois)
+        self.receiver = ThermalReceiver(ip, THERMAL_PORT, self.thermal_data, self.refresh_rois, self.roi_alarm_config)  # 🔔 알람 조건 전달
         self.receiver.start()
 
         self.update_button_states(True)
