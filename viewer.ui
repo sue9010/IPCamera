@@ -173,6 +173,7 @@
     <addaction name="actionEnhancement"/>
     <addaction name="actionDisplay"/>
     <addaction name="actionCorrection"/>
+    <addaction name="actionNUC"/>
    </widget>
    <widget class="QMenu" name="menuROI">
     <property name="title">
@@ -207,6 +208,11 @@
   <action name="actionSet_ROI">
    <property name="text">
     <string>Set ROI</string>
+   </property>
+  </action>
+  <action name="actionNUC">
+   <property name="text">
+    <string>NUC</string>
    </property>
   </action>
  </widget>

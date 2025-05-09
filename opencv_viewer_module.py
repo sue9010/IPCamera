@@ -20,6 +20,7 @@ from Camera_Control.image import ImageControlPopup
 from Camera_Control.display import DisplayControlPopup
 from Camera_Control.enhancement import EnhancementControlPopup
 from Camera_Control.correction import CorrectionControlPopup
+from Camera_Control.nuc import NUCControlPopup
 
 
 DELAY_SEC = 1
@@ -93,6 +94,7 @@ class OpenCVViewer(QMainWindow):
         self.actionDisplay.triggered.connect(self.open_display_control_popup)
         self.actionEnhancement.triggered.connect(self.open_enhancement_control_popup)
         self.actionCorrection.triggered.connect(self.open_correction_control_popup)
+        self.actionNUC.triggered.connect(self.open_nuc_control_popup)
 
         self.update_button_states(False)
 
@@ -111,6 +113,18 @@ class OpenCVViewer(QMainWindow):
             grid_layout.addWidget(min_lbl, i + 1, 2)
             grid_layout.addWidget(avr_lbl, i + 1, 3)
             self.roi_label_matrix.append({"max": max_lbl, "min": min_lbl, "avr": avr_lbl})
+
+    def open_nuc_control_popup(self):
+        ip = self.ip_input.text().strip()
+        user_id = self.id_input.text().strip()
+        user_pw = self.pw_input.text().strip()
+
+        if not ip or not user_id or not user_pw:
+            QMessageBox.warning(self, "입력 오류", "IP, ID, PW를 모두 입력하세요.")
+            return
+
+        self.nuc_popup = NUCControlPopup(ip, user_id, user_pw, self)
+        self.nuc_popup.show()
 
     def open_correction_control_popup(self):
         ip = self.ip_input.text().strip()
