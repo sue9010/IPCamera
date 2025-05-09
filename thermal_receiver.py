@@ -19,7 +19,7 @@ class ThermalReceiver(threading.Thread):
                 s.settimeout(10)
                 s.connect((self.host, self.port))
                 s.settimeout(None)
-                print(f"[ThermalReceiver] Connected to {self.host}:{self.port}")
+                # print(f"[ThermalReceiver] Connected to {self.host}:{self.port}")
 
                 while self.running:
                     data = s.recv(4096)

@@ -6,122 +6,44 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>957</width>
-    <height>567</height>
+    <width>960</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QFrame" name="top_frame">
-      <property name="maximumSize">
+     <widget class="QLabel" name="video_label">
+      <property name="minimumSize">
        <size>
-        <width>16777215</width>
-        <height>50</height>
+        <width>640</width>
+        <height>480</height>
        </size>
       </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
+      <property name="text">
+       <string>영상</string>
       </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QLabel" name="ip_input_label">
-         <property name="text">
-          <string>IP</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="ip_input">
-         <property name="text">
-          <string>192.168.0.57</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="port_input_label">
-         <property name="text">
-          <string>Port</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="port_input">
-         <property name="text">
-          <string>554</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="search_button">
-         <property name="text">
-          <string>Search IP</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="start_button">
-         <property name="text">
-          <string>Connect</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="stop_button">
-         <property name="text">
-          <string>Disconnect</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </widget>
     </item>
     <item>
-     <widget class="QFrame" name="main_frame">
+     <widget class="QFrame" name="frame">
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <property name="leftMargin">
-        <number>9</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QLabel" name="video_label">
-         <property name="minimumSize">
-          <size>
-           <width>640</width>
-           <height>480</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>640</width>
-           <height>480</height>
-          </size>
-         </property>
+        <widget class="QLineEdit" name="ip_input">
          <property name="text">
-          <string>영상</string>
+          <string>Insert IP address</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -129,19 +51,55 @@
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="frame_3">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+        <widget class="QWidget" name="widget" native="true">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>100</height>
+          </size>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
-          <property name="spacing">
+          <property name="leftMargin">
            <number>0</number>
           </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="search_button">
+            <property name="text">
+             <string>Search</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="start_button">
+            <property name="text">
+             <string>Connect</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="stop_button">
+            <property name="text">
+             <string>Disconnect</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="widget_2" native="true">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>29</height>
+          </size>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
           <property name="leftMargin">
-           <number>18</number>
+           <number>0</number>
           </property>
           <property name="topMargin">
            <number>0</number>
@@ -153,27 +111,18 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QWidget" name="roi_grid" native="true">
-            <layout class="QGridLayout" name="gridLayout">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <property name="spacing">
-              <number>0</number>
-             </property>
-            </layout>
+           <widget class="QPushButton" name="time_plot_button">
+            <property name="text">
+             <string>Time plot</string>
+            </property>
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="roi_grid" native="true">
+         <layout class="QGridLayout" name="gridLayout"/>
         </widget>
        </item>
       </layout>
@@ -181,6 +130,17 @@
     </item>
    </layout>
   </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>960</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>

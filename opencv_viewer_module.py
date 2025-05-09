@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (
     QMainWindow, QLabel, QLineEdit, QPushButton,
-    QVBoxLayout, QHBoxLayout, QWidget, QGridLayout
+    QVBoxLayout, QHBoxLayout, QWidget, QGridLayout, QMessageBox
 )
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QTimer
@@ -14,6 +14,7 @@ from roi_utils import fetch_all_rois, draw_rois
 from thermal_receiver import ThermalReceiver
 from PyQt5 import uic
 from ip_selector_popup import IPSelectorPopup
+from graph_viewer import GraphWindow
 
 DELAY_SEC = 1
 DEFAULT_IP   = "192.168.0.56"
@@ -76,11 +77,13 @@ class OpenCVViewer(QMainWindow):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
         self.roi_label_matrix = []
+        self.graph_window = None
 
         # 버튼 연결
         self.start_button.clicked.connect(self.start_stream)
         self.stop_button.clicked.connect(self.stop_stream)
         self.search_button.clicked.connect(self.open_ip_selector)
+        self.time_plot_button.clicked.connect(self.open_graph_viewer)
 
         # ROI 라벨 테이블 구성
         grid_layout = self.roi_grid.layout()
@@ -119,7 +122,7 @@ class OpenCVViewer(QMainWindow):
 
     def start_stream(self):
         ip = self.ip_input.text().strip()
-        port = self.port_input.text().strip()
+        port = 554
         rtsp_url = f"rtsp://{ip}:{port}/stream1"
 
         self.stop_stream()
@@ -185,6 +188,14 @@ class OpenCVViewer(QMainWindow):
                 h, w, ch = rgb.shape
                 qimg = QImage(rgb.data, w, h, ch * w, QImage.Format_RGB888)
                 self.video_label.setPixmap(QPixmap.fromImage(qimg))
+
+    def open_graph_viewer(self):
+        ip = self.ip_input.text().strip()
+        if not ip:
+            QMessageBox.warning(self, "IP 오류", "IP 주소를 먼저 입력해 주세요.")
+            return
+        self.graph_window = GraphWindow(ip)
+        self.graph_window.show()
 
     def closeEvent(self, event):
         self.stop_stream()
