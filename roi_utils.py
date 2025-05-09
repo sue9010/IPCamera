@@ -91,7 +91,7 @@ def draw_rois(frame, rois, thermal_data=None, scale_x=1.0, scale_y=1.0):
         cv2.rectangle(frame, (sx_r, sy_r), (ex_r, ey_r), (0, 255, 0), 1)
 
         # ROI 이름 표시 (우측 상단)
-        label_pos = (ex_r - 35, sy_r + 15)
+        label_pos = (ex_r - 25, sy_r + 15)
         cv2.putText(
             frame,
             f"ROI{idx}",
