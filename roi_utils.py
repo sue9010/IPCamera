@@ -90,8 +90,8 @@ def draw_rois(frame, rois, thermal_data=None, scale_x=1.0, scale_y=1.0):
         # 테두리
         cv2.rectangle(frame, (sx_r, sy_r), (ex_r, ey_r), (0, 255, 0), 1)
 
-        # ROI 단위 표시
-        label_pos = (ex_r - 35, ey_r - 5)
+        # ROI 이름 표시 (우측 상단)
+        label_pos = (ex_r - 35, sy_r + 15)
         cv2.putText(
             frame,
             f"ROI{idx}",
@@ -154,5 +154,3 @@ def draw_rois(frame, rois, thermal_data=None, scale_x=1.0, scale_y=1.0):
                         1,
                         cv2.LINE_AA
                     )
-
-                    
