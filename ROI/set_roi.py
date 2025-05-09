@@ -1,7 +1,6 @@
-# ROI/set_roi.py
 from PyQt5.QtWidgets import (
     QDialog, QCheckBox, QRadioButton, QWidget, QHBoxLayout,
-    QTableWidgetItem, QMessageBox, QButtonGroup
+    QTableWidgetItem, QMessageBox, QButtonGroup, QLabel, QPushButton, QTableWidget
 )
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5 import uic
@@ -9,7 +8,6 @@ from PyQt5.QtCore import Qt
 import os
 import cv2
 import requests
-from PyQt5.QtWidgets import QLabel
 
 class SetROIPopup(QDialog):
     def __init__(self, ip, user_id, user_pw, parent=None):
@@ -19,10 +17,13 @@ class SetROIPopup(QDialog):
         self.user_pw = user_pw
 
         uic.loadUi(os.path.join(os.path.dirname(__file__), "roi.ui"), self)
-        self.capture_image = self.findChild(QLabel, "capture_image")
         self.setWindowTitle("ROI 설정")
 
-        self.roi_table = self.findChild(QWidget, "roi_table")
+        self.capture_image = self.findChild(QLabel, "capture_image")
+        self.roi_table = self.findChild(QTableWidget, "roi_table")
+        self.save_button = self.findChild(QPushButton, "btn_save")
+        if self.save_button:
+            self.save_button.clicked.connect(self.save_all_rois)
 
         self.load_rtsp_frame()
         self.load_roi_data()
@@ -102,3 +103,38 @@ class SetROIPopup(QDialog):
 
             except Exception as e:
                 print(f"[ROI {roi_id}] 로딩 실패:", e)
+
+    def save_all_rois(self):
+        for row in range(10):
+            try:
+                # is_used
+                chk_widget = self.roi_table.cellWidget(row, 0)
+                chk = chk_widget.findChild(QCheckBox) if chk_widget else None
+                roi_use = "on" if chk and chk.isChecked() else "off"
+
+                # startx, starty, endx, endy
+                startx = int(self.roi_table.item(row, 1).text())
+                starty = int(self.roi_table.item(row, 2).text())
+                endx = int(self.roi_table.item(row, 3).text())
+                endy = int(self.roi_table.item(row, 4).text())
+
+                # 요청 전송
+                url = f"http://{self.ip}/cgi-bin/control/camthermalroi.cgi"
+                params = {
+                    "id": self.user_id,
+                    "passwd": self.user_pw,
+                    "action": f"setthermalroi{row}",
+                    "roi_use": roi_use,
+                    "startx": startx,
+                    "starty": starty,
+                    "endx": endx,
+                    "endy": endy
+                }
+
+                resp = requests.get(url, params=params, timeout=2)
+                if resp.status_code != 200 or "Error" in resp.text:
+                    print(f"[ROI {row}] 설정 실패: {resp.text}")
+            except Exception as e:
+                print(f"[ROI {row}] 저장 중 예외 발생:", e)
+
+        QMessageBox.information(self, "저장 완료", "모든 ROI 설정이 저장되었습니다.")

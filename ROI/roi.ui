@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>695</width>
-    <height>890</height>
+    <height>940</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -145,6 +145,13 @@
        <string>ISO Therm</string>
       </attribute>
      </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="btn_save">
+     <property name="text">
+      <string>Save</string>
+     </property>
     </widget>
    </item>
   </layout>
