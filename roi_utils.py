@@ -5,14 +5,14 @@ import re
 import os
 import cv2
 
-def fetch_all_rois(ip):
+def fetch_all_rois(ip, user_id, user_pw):
     rois = []
     try:
         for i in range(10):
             url = f"http://{ip}/cgi-bin/control/camthermalroi.cgi"
             params = {
-                "id": "admin",
-                "passwd": "admin",
+                "id": user_id,
+                "passwd": user_pw,
                 "action": f"getthermalroi{i}"
             }
             resp = requests.get(url, params=params, timeout=2)
