@@ -125,7 +125,16 @@ class OpenCVViewer(QMainWindow):
     def start_stream(self):
         ip = self.ip_input.text().strip()
         port = 554
-        rtsp_url = f"rtsp://{ip}:{port}/stream1"
+
+        user_id = self.id_input.text().strip()
+        user_pw = self.pw_input.text().strip()
+
+        self.rois = fetch_all_rois(ip, user_id, user_pw)
+        if self.rois is None:
+            QMessageBox.warning(self, "로그인 실패", "ID 또는 비밀번호가 올바르지 않습니다.")
+            return
+
+        rtsp_url = f"rtsp://{user_id}:{user_pw}@{ip}:{port}/stream1"
 
         self.stop_stream()
 
@@ -135,14 +144,12 @@ class OpenCVViewer(QMainWindow):
         self.reader = FrameReader(rtsp_url, DELAY_SEC)
         self.reader.start()
         self.timer.start(33)
-        user_id = self.id_input.text().strip()
-        user_pw = self.pw_input.text().strip()
-        self.rois = fetch_all_rois(ip, user_id, user_pw)
-        
+
         self.receiver = ThermalReceiver(ip, THERMAL_PORT, self.thermal_data, self.refresh_rois)
         self.receiver.start()
 
         QTimer.singleShot(5000, self.check_stream_timeout)
+
 
     def check_stream_timeout(self):
         if self.reader and not self.reader.cap.isOpened():

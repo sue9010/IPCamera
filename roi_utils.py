@@ -16,25 +16,30 @@ def fetch_all_rois(ip, user_id, user_pw):
                 "action": f"getthermalroi{i}"
             }
             resp = requests.get(url, params=params, timeout=2)
-            if resp.status_code == 200:
-                lines = resp.text.strip().splitlines()
-                data = {
-                    k.strip(): v.strip()
-                    for line in lines if "=" in line
-                    for k, v in [line.split("=", 1)]
-                }
-                if data.get("roi_use") == "on":
-                    try:
-                        sx = int(data["startx"])
-                        sy = int(data["starty"])
-                        ex = int(data["endx"])
-                        ey = int(data["endy"])
-                        rois.append((sx, sy, ex, ey))
-                    except Exception:
-                        continue
+            
+            # 로그인 실패 or 기타 오류 응답
+            if resp.status_code != 200 or "Unauthorized" in resp.text:
+                return None
+
+            lines = resp.text.strip().splitlines()
+            data = {
+                k.strip(): v.strip()
+                for line in lines if "=" in line
+                for k, v in [line.split("=", 1)]
+            }
+            if data.get("roi_use") == "on":
+                try:
+                    sx = int(data["startx"])
+                    sy = int(data["starty"])
+                    ex = int(data["endx"])
+                    ey = int(data["endy"])
+                    rois.append((sx, sy, ex, ey))
+                except Exception:
+                    continue
     except Exception:
-        pass
+        return None
     return rois
+
 
 
 def draw_rois(frame, rois, thermal_data=None, scale_x=1.0, scale_y=1.0):
