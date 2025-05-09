@@ -8,6 +8,7 @@ from PyQt5.QtCore import Qt
 import os
 import cv2
 import requests
+from ROI.roi_capture_widget import ROICaptureLabel
 
 class SetROIPopup(QDialog):
     def __init__(self, ip, user_id, user_pw, parent=None):
@@ -19,7 +20,10 @@ class SetROIPopup(QDialog):
         uic.loadUi(os.path.join(os.path.dirname(__file__), "roi.ui"), self)
         self.setWindowTitle("ROI 설정")
 
-        self.capture_image = self.findChild(QLabel, "capture_image")
+        # Promoted QLabel → ROICaptureLabel 이기 때문에 그대로 받아오면 됨
+        self.capture_image = self.findChild(ROICaptureLabel, "capture_image")
+        self.capture_image.on_roi_drawn = self.handle_roi_drawn
+
         self.roi_table = self.findChild(QTableWidget, "roi_table")
         self.save_button = self.findChild(QPushButton, "btn_save")
         if self.save_button:
@@ -28,6 +32,8 @@ class SetROIPopup(QDialog):
         self.frame_original = None
         self.load_rtsp_frame()
         self.load_roi_data()
+
+
 
     def load_rtsp_frame(self):
         try:
@@ -141,6 +147,22 @@ class SetROIPopup(QDialog):
                 print(f"[ROI {row}] 그리기 실패:", e)
 
         self.update_capture_display(frame)
+
+    def handle_roi_drawn(self, x1, y1, x2, y2):
+        # 선택된 ROI 찾아서 테이블 갱신
+        for row in range(10):
+            radio_widget = self.roi_table.cellWidget(row, 5)
+            if not radio_widget:
+                continue
+            radio = radio_widget.findChild(QRadioButton)
+            if radio and radio.isChecked():
+                self.roi_table.item(row, 1).setText(str(x1))
+                self.roi_table.item(row, 2).setText(str(y1))
+                self.roi_table.item(row, 3).setText(str(x2))
+                self.roi_table.item(row, 4).setText(str(y2))
+                break
+        self.draw_rois_on_image()
+
 
     def save_all_rois(self):
         for row in range(10):

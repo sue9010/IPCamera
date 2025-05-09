@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="capture_image">
+    <widget class="ROICaptureLabel" name="capture_image">
      <property name="minimumSize">
       <size>
        <width>640</width>
@@ -156,6 +156,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ROICaptureLabel</class>
+   <extends>QLabel</extends>
+   <header>ROI/roi_capture_widget</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
