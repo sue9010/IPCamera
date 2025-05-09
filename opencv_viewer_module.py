@@ -69,26 +69,23 @@ class OpenCVViewer(QMainWindow):
         super().__init__()
         uic.loadUi(resource_path("viewer.ui"), self)
 
-        # 내부 상태 초기화
         self.reader = None
         self.receiver = None
-        self.thermal_data = {}  # area_id -> {max, min, avr}
+        self.thermal_data = {}
         self.rois = []
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
         self.roi_label_matrix = []
         self.graph_window = None
 
-        # 버튼 연결
         self.start_button.clicked.connect(self.start_stream)
         self.stop_button.clicked.connect(self.stop_stream)
         self.search_button.clicked.connect(self.open_ip_selector)
         self.time_plot_button.clicked.connect(self.open_graph_viewer)
 
-        # ROI 라벨 테이블 구성
-        grid_layout = self.roi_grid.layout()
+        self.update_button_states(False)
 
-        # 🔼 헤더 추가
+        grid_layout = self.roi_grid.layout()
         grid_layout.addWidget(QLabel("영역"), 0, 0)
         grid_layout.addWidget(QLabel("Max"), 0, 1)
         grid_layout.addWidget(QLabel("Min"), 0, 2)
@@ -102,11 +99,25 @@ class OpenCVViewer(QMainWindow):
             grid_layout.addWidget(max_lbl, i + 1, 1)
             grid_layout.addWidget(min_lbl, i + 1, 2)
             grid_layout.addWidget(avr_lbl, i + 1, 3)
-            self.roi_label_matrix.append({
-                "max": max_lbl,
-                "min": min_lbl,
-                "avr": avr_lbl
-            })
+            self.roi_label_matrix.append({"max": max_lbl, "min": min_lbl, "avr": avr_lbl})
+
+    def update_button_states(self, connected):
+        self.start_button.setEnabled(not connected)
+        self.search_button.setEnabled(not connected)
+        self.ip_input.setEnabled(not connected)
+        self.id_input.setEnabled(not connected)
+        self.pw_input.setEnabled(not connected)
+
+        self.stop_button.setEnabled(connected)
+        self.time_plot_button.setEnabled(connected)
+
+        disabled_style = "background-color: lightgray; color: gray;"
+        enabled_style = ""
+
+        for widget in [self.start_button, self.search_button, self.ip_input, self.id_input, self.pw_input]:
+            widget.setStyleSheet(enabled_style if widget.isEnabled() else disabled_style)
+        for widget in [self.stop_button, self.time_plot_button]:
+            widget.setStyleSheet(enabled_style if widget.isEnabled() else disabled_style)
 
     def open_ip_selector(self):
         popup = IPSelectorPopup(self)
@@ -148,8 +159,8 @@ class OpenCVViewer(QMainWindow):
         self.receiver = ThermalReceiver(ip, THERMAL_PORT, self.thermal_data, self.refresh_rois)
         self.receiver.start()
 
+        self.update_button_states(True)
         QTimer.singleShot(5000, self.check_stream_timeout)
-
 
     def check_stream_timeout(self):
         if self.reader and not self.reader.cap.isOpened():
@@ -165,6 +176,7 @@ class OpenCVViewer(QMainWindow):
             self.receiver.stop()
             self.receiver = None
         self.video_label.clear()
+        self.update_button_states(False)
 
     def update_frame(self):
         if self.reader:
