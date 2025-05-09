@@ -21,6 +21,7 @@ from Camera_Control.display import DisplayControlPopup
 from Camera_Control.enhancement import EnhancementControlPopup
 from Camera_Control.correction import CorrectionControlPopup
 from Camera_Control.nuc import NUCControlPopup
+from Camera_Control.nuc import NUCControlPopup
 
 
 DELAY_SEC = 1
@@ -95,6 +96,7 @@ class OpenCVViewer(QMainWindow):
         self.actionEnhancement.triggered.connect(self.open_enhancement_control_popup)
         self.actionCorrection.triggered.connect(self.open_correction_control_popup)
         self.actionNUC.triggered.connect(self.open_nuc_control_popup)
+        self.nuc_button.clicked.connect(self.handle_nuc_once)
 
         self.update_button_states(False)
 
@@ -113,6 +115,9 @@ class OpenCVViewer(QMainWindow):
             grid_layout.addWidget(min_lbl, i + 1, 2)
             grid_layout.addWidget(avr_lbl, i + 1, 3)
             self.roi_label_matrix.append({"max": max_lbl, "min": min_lbl, "avr": avr_lbl})
+
+    def handle_nuc_once(self):
+        pass # TODO: NUC 즉시 실행 기능 추후 구현
 
     def open_nuc_control_popup(self):
         ip = self.ip_input.text().strip()

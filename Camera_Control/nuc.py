@@ -112,17 +112,4 @@ class NUCControlPopup(QDialog):
             QMessageBox.critical(self, "예외 발생", str(e))
 
     def nuc_once(self):
-        url = f"http://{self.ip}/cgi-bin/control/camthermalfunc.cgi"
-        params = {
-            "id": self.user_id,
-            "passwd": self.user_pw,
-            "action": "nuc"
-        }
-        try:
-            resp = requests.get(url, params=params, timeout=3)
-            if resp.status_code == 200 and "Error" not in resp.text:
-                QMessageBox.information(self, "NUC 수행", "NUC가 즉시 실행되었습니다.")
-            else:
-                QMessageBox.warning(self, "NUC 실패", f"NUC 실행 실패:\n{resp.text}")
-        except Exception as e:
-            QMessageBox.critical(self, "예외 발생", str(e))
+        pass # TODO: NUC 즉시 실행 기능 추후 구현
