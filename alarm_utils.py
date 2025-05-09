@@ -8,11 +8,11 @@ def fetch_alarm_conditions(ip, user_id, user_pw):
         print("[오류] ROI 데이터를 가져올 수 없습니다. 로그인 정보를 확인하세요.")
         return []
 
-    print("[설정된 알람 조건]")
+    # print("[설정된 알람 조건]")
     for idx, roi in enumerate(rois):
         alarm = roi.get("alarm", {})
-        print(f"ROI{idx} - 사용: {alarm.get('alarm_use')}, 모드: {alarm.get('mode')}, 조건: {alarm.get('condition')}, ",
-              f"온도: {alarm.get('temperature')}, 시작지연: {alarm.get('start_delay')}, 종료지연: {alarm.get('stop_delay')}")
+        # print(f"ROI{idx} - 사용: {alarm.get('alarm_use')}, 모드: {alarm.get('mode')}, 조건: {alarm.get('condition')}, ",
+        #       f"온도: {alarm.get('temperature')}, 시작지연: {alarm.get('start_delay')}, 종료지연: {alarm.get('stop_delay')}")
     return rois
 
 # evaluate_alarms는 열화상 TCP/IP 수신 시마다 호출되어야 합니다.
@@ -42,10 +42,10 @@ def evaluate_alarms(rois, thermal_data):
 
             temp = float(data_entry[mode_key])
 
-            if condition == "above" and temp > threshold:
-                print(f"[알람] ROI{idx}: {mode} {temp}℃ > 기준 {threshold}℃")
-            elif condition == "below" and temp < threshold:
-                print(f"[알람] ROI{idx}: {mode} {temp}℃ < 기준 {threshold}℃")
+            # if condition == "above" and temp > threshold:
+            #     print(f"[알람] ROI{idx}: {mode} {temp}℃ > 기준 {threshold}℃")
+            # elif condition == "below" and temp < threshold:
+            #     print(f"[알람] ROI{idx}: {mode} {temp}℃ < 기준 {threshold}℃")
 
         except Exception as e:
             print(f"[에러] ROI{idx} 알람 판별 중 오류: {e}")
