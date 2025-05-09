@@ -25,6 +25,7 @@ class SetROIPopup(QDialog):
         if self.save_button:
             self.save_button.clicked.connect(self.save_all_rois)
 
+        self.frame_original = None
         self.load_rtsp_frame()
         self.load_roi_data()
 
@@ -37,14 +38,18 @@ class SetROIPopup(QDialog):
             if not ret:
                 raise RuntimeError("RTSP 프레임 캡처 실패")
 
-            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            h, w, ch = rgb.shape
-            qimg = QImage(rgb.data, w, h, ch * w, QImage.Format_RGB888)
-            self.capture_image.setPixmap(QPixmap.fromImage(qimg).scaled(
-                self.capture_image.width(), self.capture_image.height(), Qt.KeepAspectRatio
-            ))
+            self.frame_original = frame.copy()  # ROI 그리기용 백업
+            self.update_capture_display(frame)
         except Exception as e:
             QMessageBox.critical(self, "RTSP 오류", f"프레임 캡처 실패:\n{str(e)}")
+
+    def update_capture_display(self, frame):
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        h, w, ch = rgb.shape
+        qimg = QImage(rgb.data, w, h, ch * w, QImage.Format_RGB888)
+        self.capture_image.setPixmap(QPixmap.fromImage(qimg).scaled(
+            self.capture_image.width(), self.capture_image.height(), Qt.KeepAspectRatio
+        ))
 
     def load_roi_data(self):
         self.roi_table.setRowCount(10)
@@ -104,21 +109,43 @@ class SetROIPopup(QDialog):
             except Exception as e:
                 print(f"[ROI {roi_id}] 로딩 실패:", e)
 
-    def save_all_rois(self):
+        self.draw_rois_on_image()
+
+    def draw_rois_on_image(self):
+        if self.frame_original is None:
+            return
+
+        frame = self.frame_original.copy()
         for row in range(10):
             try:
-                # is_used
                 chk_widget = self.roi_table.cellWidget(row, 0)
                 chk = chk_widget.findChild(QCheckBox) if chk_widget else None
-                roi_use = "on" if chk and chk.isChecked() else "off"
+                if not chk or not chk.isChecked():
+                    continue
 
-                # startx, starty, endx, endy
                 startx = int(self.roi_table.item(row, 1).text())
                 starty = int(self.roi_table.item(row, 2).text())
                 endx = int(self.roi_table.item(row, 3).text())
                 endy = int(self.roi_table.item(row, 4).text())
 
-                # 요청 전송
+                cv2.rectangle(frame, (startx, starty), (endx, endy), (0, 255, 0), 1)
+            except Exception as e:
+                print(f"[ROI {row}] 그리기 실패:", e)
+
+        self.update_capture_display(frame)
+
+    def save_all_rois(self):
+        for row in range(10):
+            try:
+                chk_widget = self.roi_table.cellWidget(row, 0)
+                chk = chk_widget.findChild(QCheckBox) if chk_widget else None
+                roi_use = "on" if chk and chk.isChecked() else "off"
+
+                startx = int(self.roi_table.item(row, 1).text())
+                starty = int(self.roi_table.item(row, 2).text())
+                endx = int(self.roi_table.item(row, 3).text())
+                endy = int(self.roi_table.item(row, 4).text())
+
                 url = f"http://{self.ip}/cgi-bin/control/camthermalroi.cgi"
                 params = {
                     "id": self.user_id,
