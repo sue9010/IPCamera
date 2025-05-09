@@ -222,4 +222,6 @@ class OpenCVViewer(QMainWindow):
 
     def closeEvent(self, event):
         self.stop_stream()
+        if self.graph_window is not None:
+            self.graph_window.close()
         super().closeEvent(event)
