@@ -1,0 +1,38 @@
+=====================================
+NVR integration
+TCP server port : 60110 
+Example JSON representation of temperature information
+---------------------------------------------
+[
+    {
+        "area_id": 0, 
+        "temp_unit": 1,    //1: Celsius  2: Fahrenheit
+        "temp_max": 29, 
+        "temp_min": 19, 
+        "temp_avr": 23, 
+        "point_max_x": 56, 
+        "point_max_y": 72, 
+        "point_min_x": 56, 
+        "point_min_y": 72
+    }, 
+:
+:
+    {
+        "area_id": 9, 
+        "temp_unit": 1, 
+        "temp_max": 29, 
+        "temp_min": 19, 
+        "temp_avr": 23, 
+        "point_max_x": 56, 
+        "point_max_y": 72, 
+        "point_min_x": 56, 
+        "point_min_y": 72
+    }
+]
+ 
+=====================================
+If you change the Image Enhancement Type to On, 0x645 will change to 0.
+ 
+fpga_write(0x0645, 0x0004);         // CIE weight
+fpga_write(0x0441, 0x0100);         // Gamma Param1 (256)
+fpga_write(0x0442, 0x0300);         // Gamma Param2 (768)
