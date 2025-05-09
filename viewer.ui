@@ -165,8 +165,50 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuCamera_control">
+    <property name="title">
+     <string>Camera control</string>
+    </property>
+    <addaction name="actionImage"/>
+    <addaction name="actionEnhancement"/>
+    <addaction name="actionDisplay"/>
+    <addaction name="actionCorrection"/>
+   </widget>
+   <widget class="QMenu" name="menuROI">
+    <property name="title">
+     <string>ROI</string>
+    </property>
+    <addaction name="actionSet_ROI"/>
+   </widget>
+   <addaction name="menuCamera_control"/>
+   <addaction name="menuROI"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionImage">
+   <property name="text">
+    <string>Image</string>
+   </property>
+  </action>
+  <action name="actionEnhancement">
+   <property name="text">
+    <string>Enhancement</string>
+   </property>
+  </action>
+  <action name="actionDisplay">
+   <property name="text">
+    <string>Display</string>
+   </property>
+  </action>
+  <action name="actionCorrection">
+   <property name="text">
+    <string>Correction</string>
+   </property>
+  </action>
+  <action name="actionSet_ROI">
+   <property name="text">
+    <string>Set ROI</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

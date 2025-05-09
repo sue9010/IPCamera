@@ -16,6 +16,10 @@ from alarm_utils import fetch_alarm_conditions  # 🔔 알람 조건 가져오�
 from PyQt5 import uic
 from ip_selector_popup import IPSelectorPopup
 from graph_viewer import GraphWindow
+from Camera_Control.image import ImageControlPopup
+from Camera_Control.display import DisplayControlPopup
+from Camera_Control.enhancement import EnhancementControlPopup
+
 
 DELAY_SEC = 1
 DEFAULT_IP   = "192.168.0.56"
@@ -84,6 +88,9 @@ class OpenCVViewer(QMainWindow):
         self.stop_button.clicked.connect(self.stop_stream)
         self.search_button.clicked.connect(self.open_ip_selector)
         self.time_plot_button.clicked.connect(self.open_graph_viewer)
+        self.actionImage.triggered.connect(self.open_image_control_popup)
+        self.actionDisplay.triggered.connect(self.open_display_control_popup)
+        self.actionEnhancement.triggered.connect(self.open_enhancement_control_popup)
 
         self.update_button_states(False)
 
@@ -102,6 +109,42 @@ class OpenCVViewer(QMainWindow):
             grid_layout.addWidget(min_lbl, i + 1, 2)
             grid_layout.addWidget(avr_lbl, i + 1, 3)
             self.roi_label_matrix.append({"max": max_lbl, "min": min_lbl, "avr": avr_lbl})
+
+    def open_enhancement_control_popup(self):
+        ip = self.ip_input.text().strip()
+        user_id = self.id_input.text().strip()
+        user_pw = self.pw_input.text().strip()
+
+        if not ip or not user_id or not user_pw:
+            QMessageBox.warning(self, "입력 오류", "IP, ID, PW를 모두 입력하세요.")
+            return
+
+        self.enhancement_popup = EnhancementControlPopup(ip, user_id, user_pw, self)
+        self.enhancement_popup.show()
+
+    def open_image_control_popup(self):
+        ip = self.ip_input.text().strip()
+        user_id = self.id_input.text().strip()
+        user_pw = self.pw_input.text().strip()
+
+        if not ip or not user_id or not user_pw:
+            QMessageBox.warning(self, "입력 오류", "IP, ID, PW를 모두 입력하세요.")
+            return
+
+        self.image_popup = ImageControlPopup(ip, user_id, user_pw, self)
+        self.image_popup.show()
+
+    def open_display_control_popup(self):
+        ip = self.ip_input.text().strip()
+        user_id = self.id_input.text().strip()
+        user_pw = self.pw_input.text().strip()
+
+        if not ip or not user_id or not user_pw:
+            QMessageBox.warning(self, "입력 오류", "IP, ID, PW를 모두 입력하세요.")
+            return
+
+        self.display_popup = DisplayControlPopup(ip, user_id, user_pw, self)
+        self.display_popup.show()
 
     def update_button_states(self, connected):
         self.start_button.setEnabled(not connected)
