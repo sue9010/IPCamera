@@ -79,15 +79,16 @@ class SetROIPopup(QDialog):
         for row in range(10):
             roi = roi_list[row] if row < len(roi_list) else {}
 
-            # ✅ 사용 여부와 좌표 가져오기
             roi_use = roi.get("used", False)
             coords = roi.get("coords", (0, 0, 0, 0))
             sx, sy, ex, ey = coords if len(coords) == 4 else (0, 0, 0, 0)
 
-            # ▷ 체크박스 (roi_use)
+            # ✅ ROI 테이블 is_used 체크박스 + 동기화 연결
             chk = QCheckBox()
-            chk.setChecked(roi_use)  # ✅ 사용 여부 반영
-            chk.stateChanged.connect(self.draw_rois_on_image)
+            chk.setChecked(roi_use)
+
+            chk.stateChanged.connect(lambda state, r=row: self.on_is_used_changed(r, state))
+
             chk_widget = QWidget()
             layout = QHBoxLayout(chk_widget)
             layout.addWidget(chk)
@@ -112,8 +113,8 @@ class SetROIPopup(QDialog):
             self.radio_group.addButton(radio)
             self.roi_table.setCellWidget(row, 5, radio_widget)
 
-        # ✅ draw는 체크된 ROI만 처리 (이미 함수 내부에서 필터됨)
         self.draw_rois_on_image()
+
 
     def load_alarm_data(self):
         if not self.alarm_table:
@@ -135,9 +136,12 @@ class SetROIPopup(QDialog):
             roi = roi_list[i]
             alarm = roi.get("alarm", {})
 
-            # ✅ ROI 사용 여부 체크박스 (is_used)
+            # ✅ is_used 체크박스 생성 + ROI/ISO와 동기화
             chk = QCheckBox()
             chk.setChecked(roi.get("used", False))
+
+            chk.stateChanged.connect(lambda state, r=i: self.on_is_used_changed(r, state))
+
             chk_widget = QWidget()
             layout = QHBoxLayout(chk_widget)
             layout.setContentsMargins(0, 0, 0, 0)
@@ -173,7 +177,7 @@ class SetROIPopup(QDialog):
         self.alarm_table.resizeColumnsToContents()
 
     def load_iso_data(self):
-        self.iso_table = self.findChild(QTableWidget, "iso_table")  # .ui 내 objectName
+        self.iso_table = self.findChild(QTableWidget, "iso_table")
         if not self.iso_table:
             print("[SetROIPopup] iso_table 연결 안됨")
             return
@@ -193,9 +197,12 @@ class SetROIPopup(QDialog):
             roi = roi_list[i]
             iso = roi.get("iso", {})
 
-            # ✅ is_used 체크박스
+            # ✅ is_used 체크박스 생성 + ROI/Alarm 동기화
             chk = QCheckBox()
             chk.setChecked(roi.get("used", False))
+
+            chk.stateChanged.connect(lambda state, r=i: self.on_is_used_changed(r, state))
+
             chk_widget = QWidget()
             layout = QHBoxLayout(chk_widget)
             layout.setContentsMargins(0, 0, 0, 0)
@@ -203,7 +210,7 @@ class SetROIPopup(QDialog):
             layout.addWidget(chk)
             self.iso_table.setCellWidget(i, 0, chk_widget)
 
-            # 🔽 Condition (above/below)
+            # 🔽 Condition
             cond_box = QComboBox()
             cond_box.addItems(["above", "below"])
             cond_box.setCurrentText(iso.get("condition", "above"))
@@ -214,13 +221,14 @@ class SetROIPopup(QDialog):
             temp.setTextAlignment(Qt.AlignCenter)
             self.iso_table.setItem(i, 2, temp)
 
-            # 🎨 Color (red, green, blue, grey)
+            # 🎨 Color
             color_box = QComboBox()
             color_box.addItems(["red", "green", "blue", "grey"])
             color_box.setCurrentText(iso.get("color", "red"))
             self.iso_table.setCellWidget(i, 3, color_box)
 
         self.iso_table.resizeColumnsToContents()
+
 
     def draw_rois_on_image(self):
         if self.frame_original is None:
@@ -355,3 +363,25 @@ class SetROIPopup(QDialog):
             QMessageBox.information(self, "저장 완료", "모든 ROI/알람/ISO 설정이 저장되었습니다.")
         else:
             QMessageBox.warning(self, "저장 실패", "일부 ROI 설정 저장에 실패했습니다.")
+
+    def on_is_used_changed(self, row, state):
+        """특정 row의 is_used 체크 상태가 바뀌면 모든 테이블에 동기화"""
+        tables = [self.roi_table, self.alarm_table, self.iso_table]
+
+        for table in tables:
+            try:
+                if not table:
+                    continue
+                widget = table.cellWidget(row, 0)
+                if not widget:
+                    continue
+                chk = widget.findChild(QCheckBox)
+                # 상태가 다르면만 갱신 (루프 방지)
+                if chk and chk.isChecked() != (state == Qt.Checked):
+                    chk.blockSignals(True)
+                    chk.setChecked(state == Qt.Checked)
+                    chk.blockSignals(False)
+            except Exception as e:
+                print(f"[is_used 동기화 오류] {table.objectName()} row {row}: {e}")
+        
+        self.draw_rois_on_image()
