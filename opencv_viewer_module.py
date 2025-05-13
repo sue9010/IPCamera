@@ -24,6 +24,7 @@ from Camera_Control.nuc import NUCControlPopup
 from Camera_Control.nuc import NUCControlPopup
 from ROI.set_roi import SetROIPopup
 from focus_control import FocusController
+from yolo_detector import YOLODetector
 
 DELAY_SEC = 1
 DEFAULT_IP   = "192.168.0.56"
@@ -94,6 +95,11 @@ class OpenCVViewer(QMainWindow):
         self.focusSpeedSlider.setMinimum(1)
         self.focusSpeedSlider.setMaximum(100)
         self.focusSpeedSlider.setValue(50)
+
+        self.yolo_enabled = False
+        self.yolo_detector = None
+        self.actionYolo.setCheckable(True)
+        self.actionYolo.triggered.connect(self.toggle_yolo_detection)
 
         self.start_button.clicked.connect(self.start_stream)
         self.stop_button.clicked.connect(self.stop_stream)
@@ -303,6 +309,13 @@ class OpenCVViewer(QMainWindow):
 
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
+                # ✅ YOLOv8 사람 인식 적용
+                if self.yolo_enabled:
+                    if self.yolo_detector is None:
+                        self.yolo_detector = YOLODetector()
+                    detections = self.yolo_detector.detect(rgb)
+                    rgb = self.yolo_detector.draw_detections(rgb, detections)
+
                 # ✅ 알람이 발생한 ROI 목록 판단
                 alarming_map = {i: [] for i in range(10)}  # {roi_idx: ["max", "min", "avr"]}
                 mode_map = {
@@ -354,7 +367,6 @@ class OpenCVViewer(QMainWindow):
                 qimg = QImage(rgb.data, w, h, ch * w, QImage.Format_RGB888)
                 self.video_label.setPixmap(QPixmap.fromImage(qimg))
 
-
     def open_graph_viewer(self):
         ip = self.ip_input.text().strip()
         if not ip:
@@ -368,3 +380,12 @@ class OpenCVViewer(QMainWindow):
         if self.graph_window is not None:
             self.graph_window.close()
         super().closeEvent(event)
+
+    def toggle_yolo_detection(self, checked):
+        self.yolo_enabled = checked
+        if self.yolo_enabled:
+            if self.yolo_detector is None:
+                self.yolo_detector = YOLODetector()
+            QMessageBox.information(self, "YOLO 활성화", "YOLOv8 사람 인식이 활성화되었습니다.")
+        else:
+            QMessageBox.information(self, "YOLO 비활성화", "YOLOv8 사람이 인식이 비활성화되었습니다.")

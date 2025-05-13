@@ -218,8 +218,15 @@
     </property>
     <addaction name="actionSet_ROI"/>
    </widget>
+   <widget class="QMenu" name="menuYolo">
+    <property name="title">
+     <string>Yolo</string>
+    </property>
+    <addaction name="actionYolo"/>
+   </widget>
    <addaction name="menuCamera_control"/>
    <addaction name="menuROI"/>
+   <addaction name="menuYolo"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionImage">
@@ -250,6 +257,11 @@
   <action name="actionNUC">
    <property name="text">
     <string>NUC</string>
+   </property>
+  </action>
+  <action name="actionYolo">
+   <property name="text">
+    <string>YOLOv8</string>
    </property>
   </action>
  </widget>
