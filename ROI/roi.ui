@@ -39,7 +39,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="roi">
       <attribute name="title">
@@ -152,6 +152,11 @@
       <attribute name="title">
        <string>ISO Therm</string>
       </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QTableWidget" name="iso_table"/>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>

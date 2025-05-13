@@ -1,8 +1,5 @@
 # roi_utils.py
 import requests
-import json
-import re
-import os
 import cv2
 
 def fetch_all_rois(ip, user_id, user_pw):
@@ -38,23 +35,34 @@ def fetch_all_rois(ip, user_id, user_pw):
                 sx = sy = ex = ey = 0
 
             alarm_data = {
-                "alarm_use": data.get("alarm_use"),
-                "mode": data.get("mode"),
-                "condition": data.get("condition"),
-                "temperature": data.get("temperature"),
-                "start_delay": data.get("start_delay"),
-                "stop_delay": data.get("stop_delay")
+                "alarm_use": data.get("alarm_use", "off"),
+                "mode": data.get("mode", ""),
+                "condition": data.get("condition", ""),
+                "temperature": data.get("temperature", ""),
+                "start_delay": data.get("start_delay", ""),
+                "stop_delay": data.get("stop_delay", ""),
+                "alarm_out": data.get("alarm_out", "")
+            }
+
+            iso_data = {
+                "iso_use": data.get("iso_use", "off"),
+                "condition": data.get("condition", ""),
+                "temperature": data.get("temperature", ""),
+                "color": data.get("iso_color", "")
             }
 
             rois.append({
                 "coords": (sx, sy, ex, ey),
+                "used": roi_use,
                 "alarm": alarm_data,
-                "used": roi_use
+                "iso": iso_data
             })
     except Exception as e:
         print(f"[fetch_all_rois] 예외 발생: {e}")
         return None
     return rois
+
+
 
 
 
