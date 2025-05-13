@@ -25,6 +25,7 @@ from Camera_Control.nuc import NUCControlPopup
 from ROI.set_roi import SetROIPopup
 from focus_control import FocusController
 from yolo_detector import YOLODetector
+import datetime
 
 DELAY_SEC = 1
 DEFAULT_IP   = "192.168.0.56"
@@ -309,12 +310,44 @@ class OpenCVViewer(QMainWindow):
 
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-                # ✅ YOLOv8 사람 인식 적용
+                # YOLOv8 사람 인식 적용
                 if self.yolo_enabled:
                     if self.yolo_detector is None:
                         self.yolo_detector = YOLODetector()
                     detections = self.yolo_detector.detect(rgb)
-                    rgb = self.yolo_detector.draw_detections(rgb, detections)
+
+                    # ✅ 사람 감지되었을 때만 박스 그리고 저장
+                    if detections:
+                        rgb = self.yolo_detector.draw_detections(rgb, detections)
+
+                        now = datetime.datetime.now()
+                        if not hasattr(self, "last_capture_time"):
+                            self.last_capture_time = None
+
+                        if self.last_capture_time is None or (now - self.last_capture_time).total_seconds() > 2:
+                            import os
+                            desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+                            capture_dir = os.path.join(desktop_path, "capture")
+                            os.makedirs(capture_dir, exist_ok=True)  # ✅ 폴더 없으면 생성됨
+
+                            timestamp = now.strftime("%Y%m%d_%H%M%S")
+                            filename = f"capture_{timestamp}.jpg"
+                            filepath = os.path.join(capture_dir, filename)
+
+                            bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+                            cv2.putText(
+                                bgr,
+                                now.strftime("%Y-%m-%d %H:%M:%S"),
+                                (10, bgr.shape[0] - 10),
+                                cv2.FONT_HERSHEY_SIMPLEX,
+                                0.5, (0, 255, 255), 1, cv2.LINE_AA
+                            )
+                            cv2.imwrite(filepath, bgr)
+                            # print(f"[YOLO 캡처] 저장됨: {filepath}")
+
+                            self.last_capture_time = now
+
+
 
                 # ✅ 알람이 발생한 ROI 목록 판단
                 alarming_map = {i: [] for i in range(10)}  # {roi_idx: ["max", "min", "avr"]}
@@ -366,6 +399,7 @@ class OpenCVViewer(QMainWindow):
                 h, w, ch = rgb.shape
                 qimg = QImage(rgb.data, w, h, ch * w, QImage.Format_RGB888)
                 self.video_label.setPixmap(QPixmap.fromImage(qimg))
+
 
     def open_graph_viewer(self):
         ip = self.ip_input.text().strip()
