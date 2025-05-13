@@ -23,7 +23,7 @@ from Camera_Control.correction import CorrectionControlPopup
 from Camera_Control.nuc import NUCControlPopup
 from Camera_Control.nuc import NUCControlPopup
 from ROI.set_roi import SetROIPopup
-
+from focus_control import FocusController
 
 DELAY_SEC = 1
 DEFAULT_IP   = "192.168.0.56"
@@ -87,6 +87,13 @@ class OpenCVViewer(QMainWindow):
         self.timer.timeout.connect(self.update_frame)
         self.roi_label_matrix = []
         self.graph_window = None
+        self.focus_controller = FocusController(
+            get_ip_func=lambda: self.ip_input.text().strip(),
+            get_speed_func=lambda: self.focusSpeedSlider.value()
+        )
+        self.focusSpeedSlider.setMinimum(1)
+        self.focusSpeedSlider.setMaximum(100)
+        self.focusSpeedSlider.setValue(50)
 
         self.start_button.clicked.connect(self.start_stream)
         self.stop_button.clicked.connect(self.stop_stream)
@@ -99,6 +106,11 @@ class OpenCVViewer(QMainWindow):
         self.actionNUC.triggered.connect(self.open_nuc_control_popup)
         self.nuc_button.clicked.connect(self.handle_nuc_once)
         self.actionSet_ROI.triggered.connect(self.open_roi_popup)
+        self.focusInButton.pressed.connect(lambda: self.focus_controller.start_focus("in"))
+        self.focusInButton.released.connect(self.focus_controller.stop_focus)
+        self.focusOutButton.pressed.connect(lambda: self.focus_controller.start_focus("out"))
+        self.focusOutButton.released.connect(self.focus_controller.stop_focus)
+
 
         self.update_button_states(False)
 
@@ -203,14 +215,16 @@ class OpenCVViewer(QMainWindow):
         self.stop_button.setEnabled(connected)
         self.time_plot_button.setEnabled(connected)
         self.nuc_button.setEnabled(connected)
+        self.focusInButton.setEnabled(connected)
+        self.focusOutButton.setEnabled(connected)
 
         disabled_style = "background-color: lightgray; color: gray;"
         enabled_style = ""
 
-        for widget in [self.start_button, self.search_button, self.ip_input, self.id_input, self.pw_input]:
-            widget.setStyleSheet(enabled_style if widget.isEnabled() else disabled_style)
-        for widget in [self.stop_button, self.time_plot_button, self.nuc_button]:
-            widget.setStyleSheet(enabled_style if widget.isEnabled() else disabled_style)
+        # for widget in [self.start_button, self.search_button, self.ip_input, self.id_input, self.pw_input]:
+        #     widget.setStyleSheet(enabled_style if widget.isEnabled() else disabled_style)
+        # for widget in [self.stop_button, self.time_plot_button, self.nuc_button, self.focusInButton, self.focusOutButton]:
+        #     widget.setStyleSheet(enabled_style if widget.isEnabled() else disabled_style)
 
     def open_ip_selector(self):
         popup = IPSelectorPopup(self)

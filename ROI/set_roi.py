@@ -9,6 +9,7 @@ import os
 import cv2
 import requests
 from ROI.roi_capture_widget import ROICaptureLabel
+from roi_utils import fetch_all_rois 
 
 class SetROIPopup(QDialog):
     def __init__(self, ip, user_id, user_pw, parent=None):
@@ -61,7 +62,7 @@ class SetROIPopup(QDialog):
         ))
 
     def load_roi_data(self):
-        self.roi_table.setRowCount(11)  # Entire + ROI 0~9
+        self.roi_table.setRowCount(10)
         self.roi_table.setColumnCount(6)
         self.roi_table.setHorizontalHeaderLabels([
             "is_used", "Start X", "Start Y", "End X", "End Y", "selected"
@@ -70,72 +71,48 @@ class SetROIPopup(QDialog):
         self.radio_group = QButtonGroup(self)
         self.radio_group.setExclusive(True)
 
-        # ▶ Entire ROI (row 0)
-        entire_chk_widget = QWidget()
-        layout = QHBoxLayout(entire_chk_widget)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setAlignment(Qt.AlignCenter)
-        layout.addWidget(QCheckBox())  # 비어있는 체크박스
-        self.roi_table.setCellWidget(0, 0, entire_chk_widget)
+        roi_list = fetch_all_rois(self.ip, self.user_id, self.user_pw)
+        if roi_list is None or len(roi_list) < 10:
+            roi_list = [{} for _ in range(10)]  # 누락 방지
 
-        self.roi_table.setItem(0, 1, QTableWidgetItem("0"))
-        self.roi_table.setItem(0, 2, QTableWidgetItem("0"))
+        for row in range(10):
+            roi = roi_list[row] if row < len(roi_list) else {}
 
-        width, height = self.resolution if hasattr(self, "resolution") else (640, 480)
-        self.roi_table.setItem(0, 3, QTableWidgetItem(str(width)))
-        self.roi_table.setItem(0, 4, QTableWidgetItem(str(height)))
+            # ROI 좌표
+            if roi.get("coords"):
+                sx, sy, ex, ey = roi["coords"]
+                roi_use = True
+            else:
+                sx = sy = ex = ey = 0
+                roi_use = False
 
-        radio_widget = QWidget()
-        rlayout = QHBoxLayout(radio_widget)
-        rlayout.setContentsMargins(0, 0, 0, 0)
-        rlayout.setAlignment(Qt.AlignCenter)
-        rlayout.addWidget(QRadioButton())
-        self.roi_table.setCellWidget(0, 5, radio_widget)
+            # ▷ 체크박스 (roi_use)
+            chk = QCheckBox()
+            chk.setChecked(roi_use)
+            chk.stateChanged.connect(self.draw_rois_on_image)
+            chk_widget = QWidget()
+            layout = QHBoxLayout(chk_widget)
+            layout.addWidget(chk)
+            layout.setAlignment(Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            self.roi_table.setCellWidget(row, 0, chk_widget)
 
-        # ▶ ROI 0~9 (row 1~10)
-        for roi_id in range(10):
-            row = roi_id + 1
-            url = f"http://{self.ip}/cgi-bin/control/camthermalroi.cgi"
-            params = {
-                "id": self.user_id,
-                "passwd": self.user_pw,
-                "action": f"getthermalroi{roi_id}"
-            }
-            try:
-                resp = requests.get(url, params=params, timeout=2)
-                if resp.status_code != 200 or "Error" in resp.text:
-                    continue
+            # ▷ 좌표 (centered)
+            for col, val in zip(range(1, 5), [sx, sy, ex, ey]):
+                item = QTableWidgetItem(str(val))
+                item.setTextAlignment(Qt.AlignCenter)
+                self.roi_table.setItem(row, col, item)
 
-                data = dict(line.split("=", 1) for line in resp.text.strip().splitlines() if "=" in line)
-
-                # is_used
-                chk = QCheckBox()
-                chk.setChecked(data.get("roi_use", "off") == "on")
-                chk.stateChanged.connect(self.draw_rois_on_image)
-                chk_widget = QWidget()
-                layout = QHBoxLayout(chk_widget)
-                layout.addWidget(chk)
-                layout.setAlignment(Qt.AlignCenter)
-                layout.setContentsMargins(0, 0, 0, 0)
-                self.roi_table.setCellWidget(row, 0, chk_widget)
-
-                coords = ["startx", "starty", "endx", "endy"]
-                for i, key in enumerate(coords, start=1):
-                    item = QTableWidgetItem(data.get(key, "0"))
-                    item.setTextAlignment(Qt.AlignCenter)
-                    self.roi_table.setItem(row, i, item)
-
-                radio = QRadioButton()
-                radio_widget = QWidget()
-                rlayout = QHBoxLayout(radio_widget)
-                rlayout.addWidget(radio)
-                rlayout.setAlignment(Qt.AlignCenter)
-                rlayout.setContentsMargins(0, 0, 0, 0)
-                self.radio_group.addButton(radio)
-                self.roi_table.setCellWidget(row, 5, radio_widget)
-
-            except Exception as e:
-                print(f"[ROI {roi_id}] 로딩 실패:", e)
+            # ▷ 라디오 버튼 (초기 선택 안 됨)
+            radio = QRadioButton()
+            radio.setChecked(False)
+            radio_widget = QWidget()
+            rlayout = QHBoxLayout(radio_widget)
+            rlayout.addWidget(radio)
+            rlayout.setAlignment(Qt.AlignCenter)
+            rlayout.setContentsMargins(0, 0, 0, 0)
+            self.radio_group.addButton(radio)
+            self.roi_table.setCellWidget(row, 5, radio_widget)
 
         self.draw_rois_on_image()
 

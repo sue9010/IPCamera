@@ -53,11 +53,6 @@
          </property>
          <row>
           <property name="text">
-           <string>Entire</string>
-          </property>
-         </row>
-         <row>
-          <property name="text">
            <string>0</string>
           </property>
          </row>
@@ -94,6 +89,11 @@
          <row>
           <property name="text">
            <string>7</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>8</string>
           </property>
          </row>
          <row>
