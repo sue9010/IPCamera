@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (
     QDialog, QCheckBox, QRadioButton, QWidget, QHBoxLayout,
-    QTableWidgetItem, QMessageBox, QButtonGroup, QLabel, QPushButton, QTableWidget
+    QTableWidgetItem, QMessageBox, QButtonGroup, QPushButton, QTableWidget,QComboBox
 )
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5 import uic
@@ -10,6 +10,7 @@ import cv2
 import requests
 from ROI.roi_capture_widget import ROICaptureLabel
 from roi_utils import fetch_all_rois 
+from ROI.alarm_roi import fetch_alarm_conditions 
 
 class SetROIPopup(QDialog):
     def __init__(self, ip, user_id, user_pw, parent=None):
@@ -29,10 +30,12 @@ class SetROIPopup(QDialog):
         self.save_button = self.findChild(QPushButton, "btn_save")
         if self.save_button:
             self.save_button.clicked.connect(self.save_all_rois)
+            self.save_button.clicked.connect(self.save_alarm_data)
         
         self.frame_original = None
         self.load_rtsp_frame()
         self.load_roi_data()
+        self.load_alarm_data()
 
 
 
@@ -114,6 +117,67 @@ class SetROIPopup(QDialog):
         # ✅ draw는 체크된 ROI만 처리 (이미 함수 내부에서 필터됨)
         self.draw_rois_on_image()
 
+    def load_alarm_data(self):
+        if not self.alarm_table:
+            print("[SetROIPopup] alarm_table 연결 안됨")
+            return
+
+        self.alarm_table.setRowCount(10)
+        self.alarm_table.setColumnCount(7)
+        self.alarm_table.setHorizontalHeaderLabels([
+            "is_used", "Mode", "Condition", "Temperature", "Start Delay", "Stop Delay", "Alarm Out"
+        ])
+        self.alarm_table.setVerticalHeaderLabels([str(i) for i in range(10)])
+
+        roi_list = fetch_all_rois(self.ip, self.user_id, self.user_pw)
+        alarm_list = fetch_alarm_conditions(self.ip, self.user_id, self.user_pw)
+
+        if roi_list is None or len(roi_list) < 10:
+            roi_list = [{} for _ in range(10)]
+        if not alarm_list or len(alarm_list) < 10:
+            alarm_list = [{} for _ in range(10)]
+
+        for i in range(10):
+            roi = roi_list[i]
+            alarm = alarm_list[i]
+
+            # ✅ ROI 사용 여부 체크박스 (is_used)
+            chk = QCheckBox()
+            chk.setChecked(roi.get("used", False))
+            chk_widget = QWidget()
+            layout = QHBoxLayout(chk_widget)
+            layout.setContentsMargins(0, 0, 0, 0)
+            layout.setAlignment(Qt.AlignCenter)
+            layout.addWidget(chk)
+            self.alarm_table.setCellWidget(i, 0, chk_widget)
+
+            # 🔽 Mode 드롭다운
+            mode_box = QComboBox()
+            mode_box.addItems(["maximum", "minimum", "average"])
+            mode_box.setCurrentText(alarm.get("mode", "maximum"))
+            self.alarm_table.setCellWidget(i, 1, mode_box)
+
+            # 🔽 Condition 드롭다운
+            cond_box = QComboBox()
+            cond_box.addItems(["above", "below"])
+            cond_box.setCurrentText(alarm.get("condition", "above"))
+            self.alarm_table.setCellWidget(i, 2, cond_box)
+
+            # 🌡 온도 및 딜레이 (일반 셀)
+            for col, key in zip(range(3, 6), ["temperature", "start_delay", "stop_delay"]):
+                val = alarm.get(key, "")
+                item = QTableWidgetItem(str(val))
+                item.setTextAlignment(Qt.AlignCenter)
+                self.alarm_table.setItem(i, col, item)
+
+            # 🔽 Alarm Out 드롭다운
+            out_box = QComboBox()
+            out_box.addItems(["none", "1", "2"])
+            out_box.setCurrentText(alarm.get("alarm_out", "none"))
+            self.alarm_table.setCellWidget(i, 6, out_box)
+
+        # ✅ 열 너비를 자동으로 조절
+        self.alarm_table.resizeColumnsToContents()
 
 
     def draw_rois_on_image(self):
@@ -193,3 +257,51 @@ class SetROIPopup(QDialog):
                 print(f"[ROI {row}] 저장 중 예외 발생:", e)
 
         QMessageBox.information(self, "저장 완료", "모든 ROI 설정이 저장되었습니다.")
+
+    def save_alarm_data(self):
+        success = True
+        for row in range(10):
+            try:
+                mode_box = self.alarm_table.cellWidget(row, 0)
+                cond_box = self.alarm_table.cellWidget(row, 1)
+                alarm_out_box = self.alarm_table.cellWidget(row, 5)
+
+                mode = mode_box.currentText() if mode_box else "maximum"
+                condition = cond_box.currentText() if cond_box else "above"
+                alarm_out = alarm_out_box.currentText() if alarm_out_box else "none"
+
+                temp_item = self.alarm_table.item(row, 2)
+                start_item = self.alarm_table.item(row, 3)
+                stop_item = self.alarm_table.item(row, 4)
+
+                temperature = temp_item.text() if temp_item else ""
+                start_delay = start_item.text() if start_item else ""
+                stop_delay = stop_item.text() if stop_item else ""
+
+                url = f"http://{self.ip}/cgi-bin/control/camthermalroi.cgi"
+                params = {
+                    "id": self.user_id,
+                    "passwd": self.user_pw,
+                    "action": f"setthermalroi{row}",
+                    "mode": mode,
+                    "condition": condition,
+                    "temperature": temperature,
+                    "start_delay": start_delay,
+                    "stop_delay": stop_delay,
+                    "alarm_out": alarm_out,
+                    "alarm_use": "on"
+                }
+
+                resp = requests.get(url, params=params, timeout=2)
+                if resp.status_code != 200 or "Error" in resp.text:
+                    print(f"[Alarm ROI {row}] 저장 실패: {resp.text}")
+                    success = False
+            except Exception as e:
+                print(f"[Alarm ROI {row}] 예외 발생:", e)
+                success = False
+
+        if success:
+            QMessageBox.information(self, "저장 완료", "모든 알람 조건이 저장되었습니다.")
+        else:
+            QMessageBox.warning(self, "저장 실패", "일부 ROI 알람 조건 저장에 실패했습니다.")
+

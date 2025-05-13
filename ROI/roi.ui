@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>695</width>
-    <height>940</height>
+    <height>930</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,12 +31,15 @@
      <property name="text">
       <string>TextLabel</string>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
     </widget>
    </item>
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="roi">
       <attribute name="title">
@@ -139,6 +142,11 @@
       <attribute name="title">
        <string>Alarm</string>
       </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QTableWidget" name="alarm_table"/>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="iso_therm">
       <attribute name="title">
