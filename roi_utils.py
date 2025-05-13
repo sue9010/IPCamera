@@ -26,35 +26,44 @@ def fetch_all_rois(ip, user_id, user_pw):
                 for line in lines if "=" in line
                 for k, v in [line.split("=", 1)]
             }
-            if data.get("roi_use") == "on":
-                try:
-                    sx = int(data["startx"])
-                    sy = int(data["starty"])
-                    ex = int(data["endx"])
-                    ey = int(data["endy"])
 
-                    alarm_data = {
-                        "alarm_use": data.get("alarm_use"),
-                        "mode": data.get("mode"),
-                        "condition": data.get("condition"),
-                        "temperature": data.get("temperature"),
-                        "start_delay": data.get("start_delay"),
-                        "stop_delay": data.get("stop_delay")
-                    }
+            roi_use = data.get("roi_use", "off") == "on"
+            try:
+                sx = int(data.get("startx", 0))
+                sy = int(data.get("starty", 0))
+                ex = int(data.get("endx", 0))
+                ey = int(data.get("endy", 0))
+            except Exception as e:
+                print(f"[ROI {i}] 좌표 파싱 실패: {e}")
+                sx = sy = ex = ey = 0
 
-                    rois.append({
-                        "coords": (sx, sy, ex, ey),
-                        "alarm": alarm_data
-                    })
-                except Exception:
-                    continue
-    except Exception:
+            alarm_data = {
+                "alarm_use": data.get("alarm_use"),
+                "mode": data.get("mode"),
+                "condition": data.get("condition"),
+                "temperature": data.get("temperature"),
+                "start_delay": data.get("start_delay"),
+                "stop_delay": data.get("stop_delay")
+            }
+
+            rois.append({
+                "coords": (sx, sy, ex, ey),
+                "alarm": alarm_data,
+                "used": roi_use
+            })
+    except Exception as e:
+        print(f"[fetch_all_rois] 예외 발생: {e}")
         return None
     return rois
 
 
+
 def draw_rois(frame, rois, thermal_data=None, scale_x=1.0, scale_y=1.0):
     for idx, roi in enumerate(rois):
+        # ✅ 사용하지 않는 ROI는 건너뜀
+        if isinstance(roi, dict) and roi.get("used") is False:
+            continue
+
         if isinstance(roi, dict):
             sx, sy, ex, ey = roi["coords"]
             alarm = roi.get("alarm", {})

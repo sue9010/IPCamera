@@ -73,22 +73,19 @@ class SetROIPopup(QDialog):
 
         roi_list = fetch_all_rois(self.ip, self.user_id, self.user_pw)
         if roi_list is None or len(roi_list) < 10:
-            roi_list = [{} for _ in range(10)]  # 누락 방지
+            roi_list = [{} for _ in range(10)]
 
         for row in range(10):
             roi = roi_list[row] if row < len(roi_list) else {}
 
-            # ROI 좌표
-            if roi.get("coords"):
-                sx, sy, ex, ey = roi["coords"]
-                roi_use = True
-            else:
-                sx = sy = ex = ey = 0
-                roi_use = False
+            # ✅ 사용 여부와 좌표 가져오기
+            roi_use = roi.get("used", False)
+            coords = roi.get("coords", (0, 0, 0, 0))
+            sx, sy, ex, ey = coords if len(coords) == 4 else (0, 0, 0, 0)
 
             # ▷ 체크박스 (roi_use)
             chk = QCheckBox()
-            chk.setChecked(roi_use)
+            chk.setChecked(roi_use)  # ✅ 사용 여부 반영
             chk.stateChanged.connect(self.draw_rois_on_image)
             chk_widget = QWidget()
             layout = QHBoxLayout(chk_widget)
@@ -97,13 +94,13 @@ class SetROIPopup(QDialog):
             layout.setContentsMargins(0, 0, 0, 0)
             self.roi_table.setCellWidget(row, 0, chk_widget)
 
-            # ▷ 좌표 (centered)
+            # ▷ 좌표 셀
             for col, val in zip(range(1, 5), [sx, sy, ex, ey]):
                 item = QTableWidgetItem(str(val))
                 item.setTextAlignment(Qt.AlignCenter)
                 self.roi_table.setItem(row, col, item)
 
-            # ▷ 라디오 버튼 (초기 선택 안 됨)
+            # ▷ 라디오 버튼
             radio = QRadioButton()
             radio.setChecked(False)
             radio_widget = QWidget()
@@ -114,7 +111,9 @@ class SetROIPopup(QDialog):
             self.radio_group.addButton(radio)
             self.roi_table.setCellWidget(row, 5, radio_widget)
 
+        # ✅ draw는 체크된 ROI만 처리 (이미 함수 내부에서 필터됨)
         self.draw_rois_on_image()
+
 
 
     def draw_rois_on_image(self):
