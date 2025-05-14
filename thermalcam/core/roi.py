@@ -62,10 +62,6 @@ def fetch_all_rois(ip, user_id, user_pw):
         return None
     return rois
 
-
-
-
-
 def draw_rois(frame, rois, thermal_data=None, scale_x=1.0, scale_y=1.0):
     for idx, roi in enumerate(rois):
         # ✅ 사용하지 않는 ROI는 건너뜀

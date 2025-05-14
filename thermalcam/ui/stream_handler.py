@@ -9,6 +9,7 @@ from thermalcam.core.roi import fetch_all_rois, draw_rois
 from thermalcam.core.alarm import fetch_alarm_conditions
 from thermalcam.core.camera_client import ThermalReceiver
 from thermalcam.core.frame_reader import FrameReader
+from thermalcam.ui.roi_display_handler import process_roi_display
 
 def prepare_stream_metadata(viewer):
     ip = viewer.ip_input.text().strip()
@@ -35,6 +36,11 @@ def connect_video_stream(viewer):
 
     viewer.reader = FrameReader(rtsp_url, viewer.DELAY_SEC)
     viewer.reader.start()
+
+    if viewer.timer is None:
+        viewer.timer = QTimer()
+        viewer.timer.timeout.connect(lambda: update_frame(viewer))
+
     viewer.timer.start(33)
 
     viewer.receiver = ThermalReceiver(
@@ -86,6 +92,12 @@ def update_frame(viewer):
         h, w, ch = rgb.shape
         bytes_per_line = ch * w
         image = QImage(rgb.data, w, h, bytes_per_line, QImage.Format_RGB888)
+
+        # ROI 처리 추가
+        scale_x = viewer.video_label.width() / rgb.shape[1]
+        scale_y = viewer.video_label.height() / rgb.shape[0]
+        process_roi_display(viewer, rgb, scale_x, scale_y)
+
         viewer.video_label.setPixmap(QPixmap.fromImage(image))
         viewer.stream_start_time = time.time()
     else:

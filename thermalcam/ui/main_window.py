@@ -22,13 +22,10 @@ from thermalcam.ui.dialogs.camera_controls.nuc import NUCControlPopup
 from thermalcam.ui.dialogs.roi_editor import SetROIPopup
 import importlib.resources   
 from thermalcam.core.frame_reader import FrameReader
-from thermalcam.ui.roi_display_handler import init_roi_labels
+from thermalcam.ui.roi_display_handler import init_roi_labels, process_roi_display
 from thermalcam.ui.stream_handler import (
     start_stream, stop_stream, update_frame
 )
-
-
-
 
 DELAY_SEC = 1
 DEFAULT_IP   = "192.168.0.56"
@@ -50,6 +47,9 @@ class OpenCVViewer(QMainWindow):
             uic.loadUi(str(ui_file), self)
 
         self.reader = None
+        self.DELAY_SEC = 1
+        self.THERMAL_PORT = 60110
+        self.stream_start_time = None
         self.receiver = None
         self.thermal_data = {}
         self.rois = []
@@ -71,7 +71,7 @@ class OpenCVViewer(QMainWindow):
         self.actionYolo.setCheckable(True)
         self.actionYolo.triggered.connect(self.toggle_yolo_detection)
 
-        self.btn_start.clicked.connect(lambda: start_stream(self))
+        self.start_button.clicked.connect(lambda: start_stream(self))
         self.stop_button.clicked.connect(lambda: stop_stream(self))
         self.search_button.clicked.connect(self.open_ip_selector)
         self.time_plot_button.clicked.connect(self.open_graph_viewer)

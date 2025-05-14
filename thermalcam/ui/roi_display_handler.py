@@ -54,6 +54,8 @@ def process_roi_display(viewer, rgb, scale_x, scale_y):
 
     if viewer.rois:
         draw_rois(rgb, viewer.rois, viewer.thermal_data, scale_x, scale_y)
+    else:
+        pass
 
     for i in range(10):
         temp = viewer.thermal_data.get(i)
