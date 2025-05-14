@@ -26,7 +26,8 @@ Show-Tree
 
 
 프로젝트 첫 빌드 (clean build)
-pyinstaller main.py --noconsole --add-data "viewer.ui;." --add-data "ROI/roi.ui;ROI" --add-data "yolov8n.pt;." --hidden-import PyQt5.sip
+pyinstaller thermalcam/cli.py --noconsole --name thermalcam --add-data "thermalcam/resources/ui/roi.ui;thermalcam/resources/ui" --add-data "thermalcam/resources/ui/viewer.ui;thermalcam/resources/ui" --add-data "thermalcam/resources/models/yolov8n.pt;thermalcam/resources/models" --hidden-import PyQt5.sip
+
 
 이후 빌드
 pyinstaller main.spec
