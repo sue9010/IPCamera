@@ -6,9 +6,6 @@ import os
 import sys
 from PyQt5 import uic
 
-from thermalcam.core.roi import fetch_all_rois
-from thermalcam.core.alarm import fetch_alarm_conditions
-from thermalcam.core.camera_client import ThermalReceiver
 from thermalcam.core.focus import FocusController
 from thermalcam.core.yolo import YOLODetector
 
@@ -21,12 +18,11 @@ from thermalcam.ui.dialogs.camera_controls.correction import CorrectionControlPo
 from thermalcam.ui.dialogs.camera_controls.nuc import NUCControlPopup
 from thermalcam.ui.dialogs.roi_editor import SetROIPopup
 import importlib.resources   
-from thermalcam.core.frame_reader import FrameReader
-from thermalcam.ui.roi_display_handler import init_roi_labels, process_roi_display
+from thermalcam.ui.roi_display_handler import init_roi_labels
 from thermalcam.ui.stream_handler import (
     start_stream, stop_stream, update_frame
 )
-from thermalcam.ui.roi_display_handler import refresh_rois
+
 
 DELAY_SEC = 1
 DEFAULT_IP   = "192.168.0.56"

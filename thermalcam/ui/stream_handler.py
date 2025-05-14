@@ -11,6 +11,8 @@ from thermalcam.core.camera_client import ThermalReceiver
 from thermalcam.core.frame_reader import FrameReader
 from thermalcam.ui.roi_display_handler import process_roi_display
 from thermalcam.ui.roi_display_handler import refresh_rois
+from thermalcam.ui.yolo_handler import handle_yolo_detection
+
 
 def prepare_stream_metadata(viewer):
     ip = viewer.ip_input.text().strip()
@@ -93,13 +95,16 @@ def update_frame(viewer):
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         h, w, ch = rgb.shape
         bytes_per_line = ch * w
-        image = QImage(rgb.data, w, h, bytes_per_line, QImage.Format_RGB888)
 
-        # ROI 처리 추가
         scale_x = viewer.video_label.width() / rgb.shape[1]
         scale_y = viewer.video_label.height() / rgb.shape[0]
         process_roi_display(viewer, rgb, scale_x, scale_y)
 
+        if viewer.yolo_enabled:
+            from thermalcam.ui.yolo_handler import handle_yolo_detection
+            rgb = handle_yolo_detection(viewer, rgb)
+
+        image = QImage(rgb.data, w, h, bytes_per_line, QImage.Format_RGB888)
         viewer.video_label.setPixmap(QPixmap.fromImage(image))
         viewer.stream_start_time = time.time()
     else:
