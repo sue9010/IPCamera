@@ -132,8 +132,14 @@
           </item>
           <item row="0" column="1">
            <widget class="QPushButton" name="yolo_button">
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
             <property name="text">
-             <string>Yolo</string>
+             <string>Yolo OFF</string>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
             </property>
            </widget>
           </item>

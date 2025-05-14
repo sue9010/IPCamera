@@ -182,7 +182,7 @@ class OpenCVViewer(QMainWindow):
         self.graph_window.show()
 
     def closeEvent(self, event):
-        self.stop_stream()
+        stop_stream(self)
         if self.graph_window is not None:
             self.graph_window.close()
         super().closeEvent(event)
@@ -192,6 +192,9 @@ class OpenCVViewer(QMainWindow):
         if self.yolo_enabled:
             if self.yolo_detector is None:
                 self.yolo_detector = YOLODetector()
-            QMessageBox.information(self, "YOLO 활성화", "YOLOv8 사람 인식이 활성화되었습니다.")
+            self.yolo_button.setText("YOLO ON")
+            # QMessageBox.information(self, "YOLO 활성화", "YOLOv8 사람 인식이 활성화되었습니다.")
         else:
-            QMessageBox.information(self, "YOLO 비활성화", "YOLOv8 사람이 인식이 비활성화되었습니다.")
+            self.yolo_button.setText("YOLO OFF")
+            # QMessageBox.information(self, "YOLO 비활성화", "YOLOv8 사람이 인식이 비활성화되었습니다.")
+
