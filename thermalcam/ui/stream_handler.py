@@ -5,11 +5,12 @@ import time
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QLabel, QMessageBox
-from thermalcam.core.roi import fetch_all_rois, draw_rois
+from thermalcam.core.roi import fetch_all_rois
 from thermalcam.core.alarm import fetch_alarm_conditions
 from thermalcam.core.camera_client import ThermalReceiver
 from thermalcam.core.frame_reader import FrameReader
 from thermalcam.ui.roi_display_handler import process_roi_display
+from thermalcam.ui.roi_display_handler import refresh_rois
 
 def prepare_stream_metadata(viewer):
     ip = viewer.ip_input.text().strip()
@@ -45,7 +46,8 @@ def connect_video_stream(viewer):
 
     viewer.receiver = ThermalReceiver(
         ip, viewer.THERMAL_PORT, viewer.thermal_data,
-        viewer.refresh_rois, viewer.roi_alarm_config
+        lambda: refresh_rois(viewer),  # ← 람다로 감싸서 함수 객체 전달
+        viewer.roi_alarm_config
     )
     viewer.receiver.start()
 

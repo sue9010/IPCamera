@@ -2,6 +2,9 @@
 
 from PyQt5.QtWidgets import QLabel
 from thermalcam.core.roi import draw_rois
+from thermalcam.core.roi import fetch_all_rois
+from thermalcam.core.alarm import fetch_alarm_conditions
+
 
 def init_roi_labels(viewer):
     """ROI 라벨 그리드 초기화"""
@@ -72,3 +75,11 @@ def process_roi_display(viewer, rgb, scale_x, scale_y):
         viewer.roi_label_matrix[i]["max"].setStyleSheet("background-color: rgb(255, 128, 128);" if "max" in alerts else "")
         viewer.roi_label_matrix[i]["min"].setStyleSheet("background-color: rgb(255, 128, 128);" if "min" in alerts else "")
         viewer.roi_label_matrix[i]["avr"].setStyleSheet("background-color: rgb(255, 128, 128);" if "avr" in alerts else "")
+
+def refresh_rois(viewer):
+    ip = viewer.ip_input.text().strip()
+    user_id = viewer.id_input.text().strip()
+    user_pw = viewer.pw_input.text().strip()
+    viewer.rois = fetch_all_rois(ip, user_id, user_pw)
+    viewer.roi_alarm_config = fetch_alarm_conditions(ip, user_id, user_pw)
+    print("[ROI Display Handler] ROI 갱신됨")

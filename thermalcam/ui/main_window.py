@@ -26,6 +26,7 @@ from thermalcam.ui.roi_display_handler import init_roi_labels, process_roi_displ
 from thermalcam.ui.stream_handler import (
     start_stream, stop_stream, update_frame
 )
+from thermalcam.ui.roi_display_handler import refresh_rois
 
 DELAY_SEC = 1
 DEFAULT_IP   = "192.168.0.56"
@@ -174,14 +175,6 @@ class OpenCVViewer(QMainWindow):
             selected_ip = popup.get_selected_ip()
             if selected_ip:
                 self.ip_input.setText(selected_ip)
-
-    def refresh_rois(self):
-        ip = self.ip_input.text().strip()
-        user_id = self.id_input.text().strip()
-        user_pw = self.pw_input.text().strip()
-        self.rois = fetch_all_rois(ip, user_id, user_pw)
-        self.roi_alarm_config = fetch_alarm_conditions(ip, user_id, user_pw)  # 🔔 ROI 갱신 시 알람 조건도 다시 가져옴
-        print("[OpenCVViewer] ROI 갱신됨")
 
     def open_graph_viewer(self):
         ip = self.ip_input.text().strip()

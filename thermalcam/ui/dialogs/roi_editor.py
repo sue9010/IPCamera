@@ -13,6 +13,7 @@ from thermalcam.ui.widgets.roi_capture_widget import ROICaptureLabel
 from thermalcam.core.roi import fetch_all_rois
 from pathlib import Path
 import time
+from thermalcam.ui.roi_display_handler import refresh_rois
 
 class SetROIPopup(QDialog):
     def __init__(self, ip, user_id, user_pw, parent=None):
@@ -375,7 +376,7 @@ class SetROIPopup(QDialog):
         if success:
             QMessageBox.information(self, "저장 완료", "모든 ROI/알람/ISO 설정이 저장되었습니다.")
             if isinstance(self.parent(), QMainWindow):
-                self.parent().refresh_rois()
+                refresh_rois(self.parent())
         else:
             QMessageBox.warning(self, "저장 실패", "일부 ROI 설정 저장에 실패했습니다.")
 
