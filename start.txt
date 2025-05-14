@@ -5,3 +5,29 @@ pip install -r requirements.txt
 
 pip freeze > requirements.txt
 
+
+
+파일 목록 출력 _ powershell 에서
+function Show-Tree {
+    param ($path = ".", $prefix = "")
+
+    Get-ChildItem $path | ForEach-Object {
+        if ($_ -is [System.IO.DirectoryInfo] -and ($exclude -notcontains $_.Name)) {
+            Write-Output "$prefix|-- $_"
+            Show-Tree "$($_.FullName)" "$prefix|   "
+        } elseif ($_ -is [System.IO.FileInfo]) {
+            Write-Output "$prefix|-- $_"
+        }
+    }
+}
+
+$exclude = @("build", "dist", "venv", "__pycache__","api")
+Show-Tree
+
+
+프로젝트 첫 빌드 (clean build)
+pyinstaller main.py --noconsole --add-data "viewer.ui;." --add-data "ROI/roi.ui;ROI" --add-data "yolov8n.pt;." --hidden-import PyQt5.sip
+
+이후 빌드
+pyinstaller main.spec
+**변경 내용 spec에 반영 후 빌드해야 함.
