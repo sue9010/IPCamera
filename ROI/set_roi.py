@@ -10,6 +10,7 @@ import cv2
 import requests
 from ROI.roi_capture_widget import ROICaptureLabel
 from roi_utils import fetch_all_rois
+from PyQt5.QtWidgets import QMainWindow
 
 
 class SetROIPopup(QDialog):
@@ -361,8 +362,11 @@ class SetROIPopup(QDialog):
 
         if success:
             QMessageBox.information(self, "저장 완료", "모든 ROI/알람/ISO 설정이 저장되었습니다.")
+            if isinstance(self.parent(), QMainWindow):
+                self.parent().refresh_rois()
         else:
             QMessageBox.warning(self, "저장 실패", "일부 ROI 설정 저장에 실패했습니다.")
+
 
     def on_is_used_changed(self, row, state):
         """특정 row의 is_used 체크 상태가 바뀌면 모든 테이블에 동기화"""

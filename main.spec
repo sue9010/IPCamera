@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('viewer.ui', '.'), ('ROI/roi.ui', 'ROI')],
+    datas=[('viewer.ui', '.'), ('ROI/roi.ui', 'ROI'), ('yolov8n.pt', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

@@ -297,109 +297,129 @@ class OpenCVViewer(QMainWindow):
     def update_frame(self):
         if self.reader:
             frame = self.reader.get_delayed()
-            if frame is not None:
-                original_h, original_w = frame.shape[:2]
+            if frame is None:
+                return
 
-                if (original_w, original_h) != (640, 480):
-                    resized_w, resized_h = 640, 480
-                    scale_x = resized_w / original_w
-                    scale_y = resized_h / original_h
-                    frame = cv2.resize(frame, (resized_w, resized_h))
-                else:
-                    scale_x = scale_y = 1.0
+            original_h, original_w = frame.shape[:2]
+            resized = False
+            if (original_w, original_h) != (640, 480):
+                frame = cv2.resize(frame, (640, 480))
+                resized = True
 
-                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-                # YOLOv8 사람 인식 적용
-                if self.yolo_enabled:
-                    if self.yolo_detector is None:
-                        self.yolo_detector = YOLODetector()
-                    detections = self.yolo_detector.detect(rgb)
+            # ✅ YOLO 적용 및 캡처
+            if self.yolo_enabled:
+                rgb = self.handle_yolo_detection(rgb)
 
-                    # ✅ 사람 감지되었을 때만 박스 그리고 저장
-                    if detections:
-                        rgb = self.yolo_detector.draw_detections(rgb, detections)
+            # 🔥 ROI + 알람 표시
+            scale_x = scale_y = 1.0
+            if resized:
+                scale_x = 640 / original_w
+                scale_y = 480 / original_h
 
-                        now = datetime.datetime.now()
-                        if not hasattr(self, "last_capture_time"):
-                            self.last_capture_time = None
+            # draw_rois 포함 기존 알람 처리 및 텍스트 출력 로직 유지
+            self.process_roi_display(rgb, scale_x, scale_y)
 
-                        if self.last_capture_time is None or (now - self.last_capture_time).total_seconds() > 2:
-                            import os
-                            desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
-                            capture_dir = os.path.join(desktop_path, "capture")
-                            os.makedirs(capture_dir, exist_ok=True)  # ✅ 폴더 없으면 생성됨
+            # QLabel에 영상 출력
+            h, w, ch = rgb.shape
+            qimg = QImage(rgb.data, w, h, ch * w, QImage.Format_RGB888)
+            self.video_label.setPixmap(QPixmap.fromImage(qimg))
 
-                            timestamp = now.strftime("%Y%m%d_%H%M%S")
-                            filename = f"capture_{timestamp}.jpg"
-                            filepath = os.path.join(capture_dir, filename)
+    def process_roi_display(self, rgb, scale_x, scale_y):
+        alarming_map = {i: [] for i in range(10)}
+        mode_map = {"maximum": "max", "minimum": "min", "average": "avr"}
 
-                            bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
-                            cv2.putText(
-                                bgr,
-                                now.strftime("%Y-%m-%d %H:%M:%S"),
-                                (10, bgr.shape[0] - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX,
-                                0.5, (0, 255, 255), 1, cv2.LINE_AA
-                            )
-                            cv2.imwrite(filepath, bgr)
-                            # print(f"[YOLO 캡처] 저장됨: {filepath}")
+        for i in range(10):
+            roi = self.rois[i] if i < len(self.rois) else None
+            td = self.thermal_data.get(i)
+            if not roi or not td:
+                continue
+            alarm = roi.get("alarm", {})
+            if alarm.get("alarm_use") == "on" and alarm.get("condition") in ("above", "below") and alarm.get("temperature"):
+                try:
+                    threshold = float(alarm["temperature"])
+                    mode = alarm.get("mode", "maximum")
+                    key = mode_map.get(mode)
+                    if key and key in td:
+                        temp = float(td[key])
+                        if (alarm["condition"] == "above" and temp > threshold) or \
+                        (alarm["condition"] == "below" and temp < threshold):
+                            alarming_map[i].append(key)
+                except:
+                    continue
 
-                            self.last_capture_time = now
+        if self.rois:
+            draw_rois(rgb, self.rois, self.thermal_data, scale_x, scale_y)
+
+        for i in range(10):
+            temp = self.thermal_data.get(i)
+            alerts = alarming_map.get(i, [])
+            if temp:
+                self.roi_label_matrix[i]["max"].setText(f"{temp['max']}℃")
+                self.roi_label_matrix[i]["min"].setText(f"{temp['min']}℃")
+                self.roi_label_matrix[i]["avr"].setText(f"{temp['avr']}℃")
+            else:
+                self.roi_label_matrix[i]["max"].setText("-")
+                self.roi_label_matrix[i]["min"].setText("-")
+                self.roi_label_matrix[i]["avr"].setText("-")
+
+            self.roi_label_matrix[i]["max"].setStyleSheet("background-color: rgb(255, 128, 128);" if "max" in alerts else "")
+            self.roi_label_matrix[i]["min"].setStyleSheet("background-color: rgb(255, 128, 128);" if "min" in alerts else "")
+            self.roi_label_matrix[i]["avr"].setStyleSheet("background-color: rgb(255, 128, 128);" if "avr" in alerts else "")
+
+
+    def handle_yolo_detection(self, rgb):
+        if self.yolo_detector is None:
+            self.yolo_detector = YOLODetector()
+
+        boxes, scores = self.yolo_detector.detect(rgb)
+
+        # confidence 0.5 이상인 박스와 점수 필터링
+        filtered_boxes = []
+        filtered_scores = []
+        for box, score in zip(boxes, scores):
+            if score >= 0.5:
+                filtered_boxes.append(box)
+                filtered_scores.append(score)
+
+        if filtered_boxes:
+            import numpy as np
+            rgb = self.yolo_detector.draw_detections(
+                rgb,
+                (np.array(filtered_boxes), np.array(filtered_scores))
+            )
+
+            now = datetime.datetime.now()
+            if not hasattr(self, "last_capture_time"):
+                self.last_capture_time = None
+
+            if self.last_capture_time is None or (now - self.last_capture_time).total_seconds() > 2:
+                self.save_capture(rgb, now)
+                self.last_capture_time = now
+
+        return rgb
 
 
 
-                # ✅ 알람이 발생한 ROI 목록 판단
-                alarming_map = {i: [] for i in range(10)}  # {roi_idx: ["max", "min", "avr"]}
-                mode_map = {
-                    "maximum": "max",
-                    "minimum": "min",
-                    "average": "avr"
-                }
+    def save_capture(self, rgb, timestamp):
+        desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+        capture_dir = os.path.join(desktop_path, "capture")
+        os.makedirs(capture_dir, exist_ok=True)
 
-                for i in range(10):
-                    roi = self.rois[i] if i < len(self.rois) else None
-                    td = self.thermal_data.get(i)
-                    if not roi or not td:
-                        continue
-                    alarm = roi.get("alarm", {})
-                    if alarm.get("alarm_use") == "on" and alarm.get("condition") in ("above", "below") and alarm.get("temperature"):
-                        try:
-                            threshold = float(alarm["temperature"])
-                            mode = alarm.get("mode", "maximum")
-                            key = mode_map.get(mode)
-                            if key and key in td:
-                                temp = float(td[key])
-                                if (alarm["condition"] == "above" and temp > threshold) or \
-                                (alarm["condition"] == "below" and temp < threshold):
-                                    alarming_map[i].append(key)
-                        except:
-                            continue
+        filename = f"capture_{timestamp.strftime('%Y%m%d_%H%M%S')}.jpg"
+        filepath = os.path.join(capture_dir, filename)
 
-                if self.rois:
-                    draw_rois(rgb, self.rois, self.thermal_data, scale_x, scale_y)
-
-                # ROI 라벨 갱신 + 데이터 표시 강조
-                for i in range(10):
-                    temp = self.thermal_data.get(i)
-                    alerts = alarming_map.get(i, [])
-                    if temp:
-                        self.roi_label_matrix[i]["max"].setText(f"{temp['max']}℃")
-                        self.roi_label_matrix[i]["min"].setText(f"{temp['min']}℃")
-                        self.roi_label_matrix[i]["avr"].setText(f"{temp['avr']}℃")
-                    else:
-                        self.roi_label_matrix[i]["max"].setText("-")
-                        self.roi_label_matrix[i]["min"].setText("-")
-                        self.roi_label_matrix[i]["avr"].setText("-")
-
-                    self.roi_label_matrix[i]["max"].setStyleSheet("background-color: rgb(255, 128, 128);" if "max" in alerts else "")
-                    self.roi_label_matrix[i]["min"].setStyleSheet("background-color: rgb(255, 128, 128);" if "min" in alerts else "")
-                    self.roi_label_matrix[i]["avr"].setStyleSheet("background-color: rgb(255, 128, 128);" if "avr" in alerts else "")
-
-                h, w, ch = rgb.shape
-                qimg = QImage(rgb.data, w, h, ch * w, QImage.Format_RGB888)
-                self.video_label.setPixmap(QPixmap.fromImage(qimg))
-
+        bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+        cv2.putText(
+            bgr,
+            timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+            (10, bgr.shape[0] - 10),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5, (0, 255, 255), 1, cv2.LINE_AA
+        )
+        cv2.imwrite(filepath, bgr)
+        print(f"[YOLO 캡처] 저장됨: {filepath}")
 
     def open_graph_viewer(self):
         ip = self.ip_input.text().strip()
