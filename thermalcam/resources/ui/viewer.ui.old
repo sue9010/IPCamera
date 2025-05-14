@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1182</width>
+    <width>960</width>
     <height>540</height>
    </rect>
   </property>
@@ -16,12 +16,44 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QWidget" name="control_frame" native="true">
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+     <widget class="QLabel" name="video_label">
+      <property name="minimumSize">
+       <size>
+        <width>640</width>
+        <height>480</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>영상</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QFrame" name="frame">
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QLineEdit" name="ip_input">
          <property name="text">
           <string>192.168.0.</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="id_input">
+         <property name="text">
+          <string>admin</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -38,16 +70,6 @@
          </property>
          <property name="echoMode">
           <enum>QLineEdit::Password</enum>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="id_input">
-         <property name="text">
-          <string>admin</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -131,9 +153,9 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QPushButton" name="yolo_button">
+           <widget class="QPushButton" name="nuc_button">
             <property name="text">
-             <string>Yolo</string>
+             <string>NUC</string>
             </property>
            </widget>
           </item>
@@ -162,60 +184,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="video_label">
-      <property name="minimumSize">
-       <size>
-        <width>640</width>
-        <height>480</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>영상</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QFrame" name="frame">
-      <property name="maximumSize">
-       <size>
-        <width>257</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
         <widget class="QWidget" name="roi_grid" native="true">
-         <property name="minimumSize">
-          <size>
-           <width>257</width>
-           <height>0</height>
-          </size>
-         </property>
          <layout class="QGridLayout" name="gridLayout"/>
         </widget>
        </item>
@@ -229,7 +198,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1182</width>
+     <width>960</width>
      <height>21</height>
     </rect>
    </property>
@@ -249,6 +218,12 @@
     </property>
     <addaction name="actionSet_ROI"/>
    </widget>
+   <widget class="QMenu" name="menuYolo">
+    <property name="title">
+     <string>Yolo</string>
+    </property>
+    <addaction name="actionYolo"/>
+   </widget>
    <widget class="QMenu" name="menuAbout">
     <property name="title">
      <string>About</string>
@@ -257,6 +232,7 @@
    </widget>
    <addaction name="menuCamera_control"/>
    <addaction name="menuROI"/>
+   <addaction name="menuYolo"/>
    <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

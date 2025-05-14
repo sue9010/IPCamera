@@ -66,7 +66,7 @@ class OpenCVViewer(QMainWindow):
         self.yolo_enabled = False
         self.yolo_detector = None
         self.actionYolo.setCheckable(True)
-        self.actionYolo.triggered.connect(self.toggle_yolo_detection)
+        self.yolo_button.setCheckable(True)
 
         self.start_button.clicked.connect(lambda: start_stream(self))
         self.stop_button.clicked.connect(lambda: stop_stream(self))
@@ -77,13 +77,13 @@ class OpenCVViewer(QMainWindow):
         self.actionEnhancement.triggered.connect(self.open_enhancement_control_popup)
         self.actionCorrection.triggered.connect(self.open_correction_control_popup)
         self.actionNUC.triggered.connect(self.open_nuc_control_popup)
-        self.nuc_button.clicked.connect(self.handle_nuc_once)
+        # self.nuc_button.clicked.connect(self.handle_nuc_once)
         self.actionSet_ROI.triggered.connect(self.open_roi_popup)
         self.focusInButton.pressed.connect(lambda: self.focus_controller.start_focus("in"))
         self.focusInButton.released.connect(self.focus_controller.stop_focus)
         self.focusOutButton.pressed.connect(lambda: self.focus_controller.start_focus("out"))
         self.focusOutButton.released.connect(self.focus_controller.stop_focus)
-
+        self.yolo_button.clicked.connect(self.toggle_yolo_detection)
 
         self.update_button_states(False)
 
@@ -154,9 +154,10 @@ class OpenCVViewer(QMainWindow):
         enable_when_connected = [
             self.stop_button,
             self.time_plot_button,
-            self.nuc_button,
+            # self.nuc_button,
             self.focusInButton,
             self.focusOutButton,
+            self.yolo_button,
         ]
 
         for widget in enable_when_disconnected:
