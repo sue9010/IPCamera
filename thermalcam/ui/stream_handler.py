@@ -34,8 +34,8 @@ def connect_video_stream(viewer):
 
     stop_stream(viewer)
 
-    viewer.video_label.setText("연결중...")
-    viewer.video_label.repaint()
+    viewer.spinner_movie.start()
+    viewer.spinner.show()
 
     viewer.reader = FrameReader(rtsp_url, viewer.DELAY_SEC)
     viewer.reader.start()
@@ -92,6 +92,11 @@ def get_current_frame(viewer):
 def update_frame(viewer):
     frame = get_current_frame(viewer)
     if frame is not None:
+
+        # ✅ 스피너 숨김 (최초 프레임 도착 시)
+        if viewer.spinner.isVisible():
+            viewer.spinner.hide()
+            viewer.spinner_movie.stop()
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         h, w, ch = rgb.shape
         bytes_per_line = ch * w

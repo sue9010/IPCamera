@@ -24,6 +24,10 @@ from thermalcam.ui.roi_display_handler import init_roi_labels
 from thermalcam.ui.stream_handler import (
     start_stream, stop_stream, update_frame
 )
+from PyQt5.QtGui import QMovie
+from PyQt5.QtWidgets import QLabel
+import os
+from PyQt5.QtCore import Qt
 
 
 DELAY_SEC = 1
@@ -88,6 +92,23 @@ class OpenCVViewer(QMainWindow):
         self.focusOutButton.released.connect(self.focus_controller.stop_focus)
         self.yolo_button.clicked.connect(self.toggle_yolo_detection)
         self.log_console.moveCursor(QTextCursor.End)
+
+        # 🔹 로딩 스피너 추가
+        self.spinner = QLabel(self.video_label)
+        self.spinner.setFixedSize(640, 480)
+        self.spinner.setAlignment(Qt.AlignCenter)
+        self.spinner.setScaledContents(True)
+        self.spinner.setStyleSheet("background-color: rgba(0, 0, 0, 80); border-radius: 10px;")
+
+        spinner_path = os.path.join(os.path.dirname(__file__), "../resources/icons/spinner.gif")
+        spinner_path = os.path.normpath(spinner_path)
+
+
+        self.spinner_movie = QMovie(spinner_path)
+        self.spinner.setMovie(self.spinner_movie)
+        self.spinner_movie.start()
+        # self.spinner.show()
+        self.spinner.hide()
 
         self.update_button_states(False)
 
@@ -213,4 +234,11 @@ class OpenCVViewer(QMainWindow):
             self.log_console.moveCursor(QTextCursor.End)
         else:
             print(line)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if hasattr(self, "spinner"):
+            cx = self.video_label.width() // 2 - self.spinner.width() // 2
+            cy = self.video_label.height() // 2 - self.spinner.height() // 2
+            self.spinner.move(cx, cy)
 

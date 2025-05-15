@@ -42,7 +42,8 @@ class ROIDrawer:
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
 
             except Exception as e:
-                print(f"[ROI {row}] 그리기 실패:", e)
+                pass
+                # print(f"[ROI {row}] 그리기 실패:", e)
 
         self.update_capture_display(frame)
 
@@ -72,7 +73,8 @@ class ROIDrawer:
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA)
 
             except Exception as e:
-                print(f"[ROI {row}] 그리기 실패:", e)
+                pass
+                # print(f"[ROI {row}] 그리기 실패:", e)
 
 
     def update_capture_display(self, frame):
