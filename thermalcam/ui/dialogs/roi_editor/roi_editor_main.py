@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QTableWidget, QPushButton, QCheckBox
+from PyQt5.QtWidgets import QDialog, QTableWidget, QPushButton, QCheckBox, QRadioButton
 from PyQt5 import uic
 from importlib.resources import path
 
@@ -9,7 +9,7 @@ from .roi_saver import ROISaver
 from .roi_sync import ROISyncManager
 from .roi_capture_handler import ROICaptureHandler
 from .rtsp_utils import load_rtsp_frame
-
+ 
 class SetROIPopup(QDialog):
     def __init__(self, ip, user_id, user_pw, main_window, parent=None):
         super().__init__(parent)
@@ -59,9 +59,19 @@ class SetROIPopup(QDialog):
 
         # 7. ROI 표시
         self.drawer.draw_rois_on_image()
+        self.capture_image.on_roi_selected = self._on_roi_selected_from_image
+
 
         # 8. ROI 좌표 셀 변경 시 ROI 이미지 자동 갱신
         self.roi_table.cellChanged.connect(self._on_roi_table_cell_changed)
+
+    def _on_roi_selected_from_image(self, row):
+        """이미지에서 ROI 클릭 시 테이블의 라디오 버튼 체크"""
+        radio_widget = self.roi_table.cellWidget(row, 5)
+        if radio_widget:
+            radio = radio_widget.findChild(QRadioButton)
+            if radio and not radio.isChecked():
+                radio.setChecked(True)
 
     def _connect_usage_sync_signals(self):
         """roi/alarm/iso 테이블의 is_used 체크박스에 stateChanged 시그널 연결"""
