@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QCheckBox, QComboBox, QTableWidgetItem, QWidget, QHBoxLayout
+from PyQt5.QtWidgets import QCheckBox, QComboBox, QTableWidgetItem, QWidget, QHBoxLayout, QRadioButton, QButtonGroup
 from PyQt5.QtCore import Qt
 from thermalcam.core.roi import fetch_all_rois
 
@@ -21,7 +21,10 @@ class ROILoader:
         self.roi_table.setColumnCount(6)
         self.roi_table.setHorizontalHeaderLabels(["is_used", "Start X", "Start Y", "End X", "End Y", "selected"])
 
-        self.radio_group = []
+        # 🔥 radio 그룹 설정 (단일 선택 전용)
+        self.radio_group = QButtonGroup()
+        self.radio_group.setExclusive(True)
+
         roi_list = fetch_all_rois(self.ip, self.user_id, self.user_pw) or [{} for _ in range(10)]
 
         for row in range(10):
@@ -30,6 +33,7 @@ class ROILoader:
             coords = roi.get("coords", (0, 0, 0, 0))
             sx, sy, ex, ey = coords if len(coords) == 4 else (0, 0, 0, 0)
 
+            # ✅ is_used 체크박스
             chk = QCheckBox()
             chk.setChecked(roi_use)
             chk_widget = QWidget()
@@ -39,20 +43,21 @@ class ROILoader:
             layout.setContentsMargins(0, 0, 0, 0)
             self.roi_table.setCellWidget(row, 0, chk_widget)
 
+            # ✅ 좌표 아이템
             for col, val in zip(range(1, 5), [sx, sy, ex, ey]):
                 item = QTableWidgetItem(str(val))
                 item.setTextAlignment(Qt.AlignCenter)
                 self.roi_table.setItem(row, col, item)
 
-            radio = QCheckBox()
-            radio.setChecked(False)
+            # ✅ selected: 라디오 버튼 (단일 선택)
+            radio = QRadioButton()
             radio_widget = QWidget()
             rlayout = QHBoxLayout(radio_widget)
             rlayout.addWidget(radio)
             rlayout.setAlignment(Qt.AlignCenter)
             rlayout.setContentsMargins(0, 0, 0, 0)
             self.roi_table.setCellWidget(row, 5, radio_widget)
-            self.radio_group.append(radio)
+            self.radio_group.addButton(radio, row)
 
     def load_alarm_data(self):
         if not self.alarm_table:

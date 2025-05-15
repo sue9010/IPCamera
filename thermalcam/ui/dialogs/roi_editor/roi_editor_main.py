@@ -60,6 +60,9 @@ class SetROIPopup(QDialog):
         # 7. ROI 표시
         self.drawer.draw_rois_on_image()
 
+        # 8. ROI 좌표 셀 변경 시 ROI 이미지 자동 갱신
+        self.roi_table.cellChanged.connect(self._on_roi_table_cell_changed)
+
     def _connect_usage_sync_signals(self):
         """roi/alarm/iso 테이블의 is_used 체크박스에 stateChanged 시그널 연결"""
         for table in [self.roi_table, self.alarm_table, self.iso_table]:
@@ -72,3 +75,8 @@ class SetROIPopup(QDialog):
                 chk = widget.findChild(QCheckBox)
                 if chk:
                     chk.stateChanged.connect(lambda state, r=row: self.sync.sync_is_used(r, state))
+
+    def _on_roi_table_cell_changed(self, row, col):
+        """ROI 좌표 셀 수정 시 이미지 업데이트"""
+        if col in (1, 2, 3, 4):  # StartX, StartY, EndX, EndY
+            self.drawer.draw_rois_on_image()
