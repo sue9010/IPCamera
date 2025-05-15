@@ -1,5 +1,6 @@
 python -m venv venv
 .\venv\Scripts\activate          
+python -m thermalcam.cli
 
 pip install -r requirements.txt
 

@@ -6,6 +6,7 @@ from PyQt5.QtCore import QTimer
 from thermalcam.core.roi import fetch_all_rois
 from thermalcam.core.alarm import fetch_alarm_conditions
 from thermalcam.ui.stream_handler import update_frame
+from thermalcam.ui.roi_display_handler import init_roi_labels
 
 class ROISaver:
     def __init__(self, ip, user_id, user_pw, roi_table, alarm_table, iso_table, parent=None):
@@ -108,16 +109,12 @@ class ROISaver:
 
         # UI 응답
         if success:
-            QMessageBox.information(self.parent, "저장 완료", "모든 ROI/알람/ISO 설정이 저장되었습니다.")
             if isinstance(self.parent, QMainWindow):
-                # 1. ROI 설정 갱신
                 self.parent.rois = fetch_all_rois(self.ip, self.user_id, self.user_pw)
                 self.parent.roi_alarm_config = fetch_alarm_conditions(self.ip, self.user_id, self.user_pw)
-
-                # 2. 프레임 강제 redraw
-                update_frame(self.parent)
-
-                # 3. 다음 프레임에도 한번 더
-                QTimer.singleShot(100, lambda: update_frame(self.parent))
+                # 영상 프레임 다시 그리기
+                # update_frame(self.parent)
+                # QTimer.singleShot(100, lambda: update_frame(self.parent))
+                QMessageBox.information(self.parent, "저장 완료", "모든 ROI/알람/ISO 설정이 저장되었습니다.")
         else:
             QMessageBox.warning(self.parent, "저장 실패", "일부 ROI 설정 저장에 실패했습니다.")

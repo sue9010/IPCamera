@@ -99,7 +99,8 @@ class OpenCVViewer(QMainWindow):
             QMessageBox.warning(self, "입력 오류", "IP, ID, PW를 모두 입력하세요.")
             return
 
-        self.roi_popup = SetROIPopup(ip, user_id, user_pw, self)
+        self.roi_popup = SetROIPopup(ip, user_id, user_pw, main_window=self, parent=self)
+
         self.roi_popup.show()
 
     def handle_nuc_once(self):

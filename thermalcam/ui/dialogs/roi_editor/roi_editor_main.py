@@ -11,11 +11,12 @@ from .roi_capture_handler import ROICaptureHandler
 from .rtsp_utils import load_rtsp_frame
 
 class SetROIPopup(QDialog):
-    def __init__(self, ip, user_id, user_pw, parent=None):
+    def __init__(self, ip, user_id, user_pw, main_window, parent=None):
         super().__init__(parent)
         self.ip = ip
         self.user_id = user_id
         self.user_pw = user_pw
+        self.main_window = main_window
 
         # 1. UI 로드
         with path("thermalcam.resources.ui", "roi.ui") as ui_file:
@@ -31,7 +32,11 @@ class SetROIPopup(QDialog):
         # 3. 구성 요소 조립
         self.drawer = ROIDrawer(self.roi_table, self.capture_image)
         self.loader = ROILoader(self.ip, self.user_id, self.user_pw, self.roi_table, self.alarm_table, self.iso_table)
-        self.saver = ROISaver(self.ip, self.user_id, self.user_pw, self.roi_table, self.alarm_table, self.iso_table, self)
+        self.saver = ROISaver(
+            self.ip, self.user_id, self.user_pw,
+            self.roi_table, self.alarm_table, self.iso_table,
+            parent=self.main_window  # 🔹 parent를 main_window로 설정
+        )
         self.sync = ROISyncManager(self.roi_table, self.alarm_table, self.iso_table, self.drawer)
         self.capture_handler = ROICaptureHandler(self.roi_table, self.drawer)
 
