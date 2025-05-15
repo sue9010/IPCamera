@@ -92,7 +92,7 @@ class SetROIPopup(QDialog):
                     item.setText(str(val))
             self.drawer.draw_rois_on_image()
         except Exception as e:
-            print(f"[ROI 이동 오류] row {row}, dx={dx}, dy={dy}: {e}")
+            self.main_window.log(f"[ROI 이동 오류] row {row}, dx={dx}, dy={dy}: {e}")
 
     def _connect_usage_sync_signals(self):
         """roi/alarm/iso 테이블의 is_used 체크박스에 stateChanged 시그널 연결"""
@@ -125,7 +125,7 @@ class SetROIPopup(QDialog):
                     target.setText(value)
                     self.iso_table.blockSignals(False)
             except Exception as e:
-                print(f"[알람→ISO 동기화 오류] row={row}: {e}")
+                self.main_window.log(f"[알람→ISO 동기화 오류] row={row}: {e}")
 
     def _sync_iso_to_alarm(self, item):
         """ISO 탭에서 온도 수정 → 알람 탭으로 반영"""
@@ -140,4 +140,4 @@ class SetROIPopup(QDialog):
                     target.setText(value)
                     self.alarm_table.blockSignals(False)
             except Exception as e:
-                print(f"[ISO→알람 동기화 오류] row={row}: {e}")
+                self.main_window.log(f"[ISO→알람 동기화 오류] row={row}: {e}")

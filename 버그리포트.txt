@@ -1,0 +1,4 @@
+1. NUC at once: API없음
+2. NUC Period:  0ff로 설정후 저장해도 다시 읽어올때는 60 (1분)으로 나옴.
+                NUC mode를 OFF로 설정해도 동일하게 NUC Period가 60 (1분)으로 나옴.
+

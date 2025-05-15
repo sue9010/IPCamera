@@ -120,16 +120,16 @@ class ROISaver:
                         if resp.status_code == 200 and "Error" not in resp.text:
                             break
                         else:
-                            print(f"[ROI {row}] 시도 {attempt} 실패: {resp.text}")
+                            self.parent.log(f"[ROI {row}] 시도 {attempt} 실패: {resp.text}")
                     except requests.RequestException as e:
-                        print(f"[ROI {row}] 시도 {attempt} 예외 발생: {e}")
+                        self.parent.log(f"[ROI {row}] 시도 {attempt} 예외 발생: {e}")
                     time.sleep(0.5)
                 else:
-                    print(f"[ROI {row}] 모든 시도 실패")
+                    self.parent.log(f"[ROI {row}] 모든 시도 실패")
                     success = False
 
             except Exception as e:
-                print(f"[ROI {row}] 저장 중 예외 발생:", e)
+                self.parent.log(f"[ROI {row}] 저장 중 예외 발생: {e}")
                 success = False
 
         # ✅ UI 갱신
@@ -139,6 +139,6 @@ class ROISaver:
                 self.parent.roi_alarm_config = fetch_alarm_conditions(self.ip, self.user_id, self.user_pw)
                 update_frame(self.parent)
                 QTimer.singleShot(100, lambda: update_frame(self.parent))
-            QMessageBox.information(self.parent, "저장 완료", "변경된 ROI 설정만 저장했습니다.")
+            self.parent.log("ROI 설정 변경")
         else:
             QMessageBox.warning(self.parent, "저장 실패", "일부 ROI 설정 저장에 실패했습니다.")

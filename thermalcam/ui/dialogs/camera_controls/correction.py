@@ -8,6 +8,7 @@ import requests
 class CorrectionControlPopup(QDialog):
     def __init__(self, ip, user_id, user_pw, parent=None):
         super().__init__(parent)
+        self.main_window = parent
         self.setWindowTitle("Correction 설정")
         self.ip = ip
         self.user_id = user_id
@@ -150,7 +151,7 @@ class CorrectionControlPopup(QDialog):
         try:
             resp = requests.get(url, params=params, timeout=3)
             if resp.status_code == 200 and "Error" not in resp.text:
-                QMessageBox.information(self, "성공", "설정이 적용되었습니다.")
+                self.main_window.log("[설정 변경] Correction")
             else:
                 QMessageBox.warning(self, "실패", f"적용 실패:\n{resp.text}")
         except Exception as e:

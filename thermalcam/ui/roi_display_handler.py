@@ -82,4 +82,4 @@ def refresh_rois(viewer):
     user_pw = viewer.pw_input.text().strip()
     viewer.rois = fetch_all_rois(ip, user_id, user_pw)
     viewer.roi_alarm_config = fetch_alarm_conditions(ip, user_id, user_pw)
-    print("[ROI Display Handler] ROI 갱신됨")
+    viewer.log("ROI 갱신됨")

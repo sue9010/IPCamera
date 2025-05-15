@@ -1,10 +1,12 @@
 from PyQt5.QtWidgets import (
-    QMainWindow,QMessageBox
+    QMainWindow,QMessageBox, 
 )
 from PyQt5.QtCore import QTimer
 import os
 import sys
 from PyQt5 import uic
+from PyQt5.QtGui import QTextCursor
+from datetime import datetime
 
 from thermalcam.core.focus import FocusController
 from thermalcam.core.yolo import YOLODetector
@@ -84,6 +86,7 @@ class OpenCVViewer(QMainWindow):
         self.focusOutButton.pressed.connect(lambda: self.focus_controller.start_focus("out"))
         self.focusOutButton.released.connect(self.focus_controller.stop_focus)
         self.yolo_button.clicked.connect(self.toggle_yolo_detection)
+        self.log_console.moveCursor(QTextCursor.End)
 
         self.update_button_states(False)
 
@@ -194,8 +197,19 @@ class OpenCVViewer(QMainWindow):
             if self.yolo_detector is None:
                 self.yolo_detector = YOLODetector()
             self.yolo_button.setText("YOLO ON")
-            # QMessageBox.information(self, "YOLO 활성화", "YOLOv8 사람 인식이 활성화되었습니다.")
+            self.log("Yolo ON")
         else:
             self.yolo_button.setText("YOLO OFF")
-            # QMessageBox.information(self, "YOLO 비활성화", "YOLOv8 사람이 인식이 비활성화되었습니다.")
+            self.log("Yolo OFF")
+
+
+
+    def log(self, message: str):
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        line = f"[{timestamp}] {message}"
+        if hasattr(self, "log_console") and self.log_console:
+            self.log_console.appendPlainText(line)
+            self.log_console.moveCursor(QTextCursor.End)
+        else:
+            print(line)
 

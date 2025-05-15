@@ -6,6 +6,7 @@ import requests
 class NUCControlPopup(QDialog):
     def __init__(self, ip, user_id, user_pw, parent=None):
         super().__init__(parent)
+        self.main_window = parent
         self.setWindowTitle("NUC 설정")
         self.ip = ip
         self.user_id = user_id
@@ -16,12 +17,11 @@ class NUCControlPopup(QDialog):
         self.nuc_mode.addItems(["off", "time", "auto", "timeauto"])
 
         # 초 단위 실제 값
-        self.nuc_time_seconds = ["0", "60", "120", "180", "240", "300", "600", "1200", "1800", "3600"]
+        self.nuc_time_seconds = ["0","60", "120", "180", "240", "300", "600", "1200", "1800", "3600"]
         # UI 표시: 분 단위
         self.nuc_time = QComboBox()
-        self.nuc_time.addItems(
-            [f"{int(int(s) // 60)}분" if s != "0" else "0분" for s in self.nuc_time_seconds]
-        )
+        self.nuc_time_labels = ["OFF" if s == "0" else f"{int(s)//60}분" for s in self.nuc_time_seconds]
+        self.nuc_time.addItems(self.nuc_time_labels)
 
         self.nuc_sens = QComboBox()
         self.nuc_sens.addItems(["lowest", "low", "middle", "high", "highest"])
@@ -74,6 +74,7 @@ class NUCControlPopup(QDialog):
 
             # ▼ nucmode
             nucmode_val = data.get("nucmode", "off")
+            print(f"[디버그] 서버 응답 nucmode 값: {nucmode_val}")
             if nucmode_val in [self.nuc_mode.itemText(i) for i in range(self.nuc_mode.count())]:
                 self.nuc_mode.setCurrentText(nucmode_val)
             else:
@@ -81,13 +82,16 @@ class NUCControlPopup(QDialog):
 
             # ▼ nuctime (초 → index 매핑)
             nuctime_val = data.get("nuctime", "60")
+            print(f"[디버그] 서버 응답 nuctime 값: {nuctime_val}")
             if nuctime_val in self.nuc_time_seconds:
-                self.nuc_time.setCurrentIndex(self.nuc_time_seconds.index(nuctime_val))
+                index = self.nuc_time_seconds.index(nuctime_val)
+                self.nuc_time.setCurrentIndex(index)
             else:
                 self.nuc_time.setCurrentIndex(1)  # default: 60s = 1분
 
             # ▼ nucautosens
             nucsens_val = data.get("nucautosens", "middle")
+            print(f"[디버그] 서버 응답 nucautosens 값: {nucsens_val}")
             if nucsens_val in [self.nuc_sens.itemText(i) for i in range(self.nuc_sens.count())]:
                 self.nuc_sens.setCurrentText(nucsens_val)
             else:
@@ -109,7 +113,7 @@ class NUCControlPopup(QDialog):
         try:
             resp = requests.get(url, params=params, timeout=3)
             if resp.status_code == 200 and "Error" not in resp.text:
-                QMessageBox.information(self, "성공", "NUC 설정이 적용되었습니다.")
+                self.main_window.log("[설정 변경] NUC")
             else:
                 QMessageBox.warning(self, "실패", f"NUC 설정 실패:\n{resp.text}")
         except Exception as e:
