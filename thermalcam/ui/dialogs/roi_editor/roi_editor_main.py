@@ -48,6 +48,8 @@ class SetROIPopup(QDialog):
         try:
             self.frame_original, self.resolution = load_rtsp_frame(self.ip, self)
             self.drawer.set_frame(self.frame_original)
+            self.capture_image.image_width = self.resolution[0]
+            self.capture_image.image_height = self.resolution[1]
         except Exception:
             return  # 이미 QMessageBox 표시됨
 
@@ -60,6 +62,7 @@ class SetROIPopup(QDialog):
         # 7. ROI 표시
         self.drawer.draw_rois_on_image()
         self.capture_image.on_roi_selected = self._on_roi_selected_from_image
+        self.capture_image.on_roi_moved = self._on_roi_moved_from_image
 
 
         # 8. ROI 좌표 셀 변경 시 ROI 이미지 자동 갱신
@@ -72,6 +75,18 @@ class SetROIPopup(QDialog):
             radio = radio_widget.findChild(QRadioButton)
             if radio and not radio.isChecked():
                 radio.setChecked(True)
+
+    def _on_roi_moved_from_image(self, row, dx, dy):
+        """ROI가 이미지에서 드래그로 이동됐을 때 테이블 좌표를 업데이트"""
+        try:
+            for col, offset in zip((1, 2, 3, 4), (dx, dy, dx, dy)):
+                item = self.roi_table.item(row, col)
+                if item:
+                    val = int(item.text()) + offset
+                    item.setText(str(val))
+            self.drawer.draw_rois_on_image()
+        except Exception as e:
+            print(f"[ROI 이동 오류] row {row}, dx={dx}, dy={dy}: {e}")
 
     def _connect_usage_sync_signals(self):
         """roi/alarm/iso 테이블의 is_used 체크박스에 stateChanged 시그널 연결"""
