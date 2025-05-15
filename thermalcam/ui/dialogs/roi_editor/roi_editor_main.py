@@ -21,12 +21,14 @@ class SetROIPopup(QDialog):
         # 1. UI 로드
         with path("thermalcam.resources.ui", "roi.ui") as ui_file:
             uic.loadUi(str(ui_file), self)
+        
+        self.tabWidget.setCurrentIndex(0)
 
         # 2. 위젯 찾기
         self.capture_image = self.findChild(ROICaptureLabel, "capture_image")
-        self.roi_table = self.findChild(QTableWidget, "roi_table")
-        self.alarm_table = self.findChild(QTableWidget, "alarm_table")
         self.iso_table = self.findChild(QTableWidget, "iso_table")
+        self.alarm_table = self.findChild(QTableWidget, "alarm_table")
+        self.roi_table = self.findChild(QTableWidget, "roi_table")
         self.save_button = self.findChild(QPushButton, "btn_save")
 
         # 3. 구성 요소 조립
@@ -68,6 +70,10 @@ class SetROIPopup(QDialog):
         # 8. ROI 좌표 셀 변경 시 ROI 이미지 자동 갱신
         self.roi_table.cellChanged.connect(self._on_roi_table_cell_changed)
 
+        # 9. Temperature value동기화
+        self.alarm_table.itemChanged.connect(self._sync_alarm_to_iso)
+        self.iso_table.itemChanged.connect(self._sync_iso_to_alarm)
+
     def _on_roi_selected_from_image(self, row):
         """이미지에서 ROI 클릭 시 테이블의 라디오 버튼 체크"""
         radio_widget = self.roi_table.cellWidget(row, 5)
@@ -105,3 +111,33 @@ class SetROIPopup(QDialog):
         """ROI 좌표 셀 수정 시 이미지 업데이트"""
         if col in (1, 2, 3, 4):  # StartX, StartY, EndX, EndY
             self.drawer.draw_rois_on_image()
+
+    def _sync_alarm_to_iso(self, item):
+        """알람 탭에서 온도 수정 → ISO 탭으로 반영"""
+        row = item.row()
+        col = item.column()
+        if col == 3:  # temperature 열
+            try:
+                value = item.text()
+                target = self.iso_table.item(row, 2)
+                if target and target.text() != value:
+                    self.iso_table.blockSignals(True)
+                    target.setText(value)
+                    self.iso_table.blockSignals(False)
+            except Exception as e:
+                print(f"[알람→ISO 동기화 오류] row={row}: {e}")
+
+    def _sync_iso_to_alarm(self, item):
+        """ISO 탭에서 온도 수정 → 알람 탭으로 반영"""
+        row = item.row()
+        col = item.column()
+        if col == 2:  # temperature 열
+            try:
+                value = item.text()
+                target = self.alarm_table.item(row, 3)
+                if target and target.text() != value:
+                    self.alarm_table.blockSignals(True)
+                    target.setText(value)
+                    self.alarm_table.blockSignals(False)
+            except Exception as e:
+                print(f"[ISO→알람 동기화 오류] row={row}: {e}")
