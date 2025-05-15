@@ -8,7 +8,10 @@ from .roi_drawer import ROIDrawer
 from .roi_saver import ROISaver
 from .roi_sync import ROISyncManager
 from .roi_capture_handler import ROICaptureHandler
-from .rtsp_utils import load_rtsp_frame
+from .roi_loader_thread import ROILoaderThread
+from PyQt5.QtCore import pyqtSlot
+
+
  
 class SetROIPopup(QDialog):
     def __init__(self, ip, user_id, user_pw, main_window, parent=None):
@@ -17,27 +20,28 @@ class SetROIPopup(QDialog):
         self.user_id = user_id
         self.user_pw = user_pw
         self.main_window = main_window
+        self.frame_original = None  # 아직 없음
+        self.resolution = (640, 480)  # 기본값
 
-        # 1. UI 로드
         with path("thermalcam.resources.ui", "roi.ui") as ui_file:
             uic.loadUi(str(ui_file), self)
-        
+
         self.tabWidget.setCurrentIndex(0)
 
-        # 2. 위젯 찾기
+        # 위젯 찾기
         self.capture_image = self.findChild(ROICaptureLabel, "capture_image")
         self.iso_table = self.findChild(QTableWidget, "iso_table")
         self.alarm_table = self.findChild(QTableWidget, "alarm_table")
         self.roi_table = self.findChild(QTableWidget, "roi_table")
         self.save_button = self.findChild(QPushButton, "btn_save")
 
-        # 3. 구성 요소 조립
+        # 컴포넌트 조립
         self.drawer = ROIDrawer(self.roi_table, self.capture_image)
         self.loader = ROILoader(self.ip, self.user_id, self.user_pw, self.roi_table, self.alarm_table, self.iso_table)
         self.saver = ROISaver(
             self.ip, self.user_id, self.user_pw,
             self.roi_table, self.alarm_table, self.iso_table,
-            parent=self.main_window  # 🔹 parent를 main_window로 설정
+            parent=self.main_window
         )
         self.sync = ROISyncManager(self.roi_table, self.alarm_table, self.iso_table, self.drawer)
         self.capture_handler = ROICaptureHandler(self.roi_table, self.drawer)
@@ -46,33 +50,22 @@ class SetROIPopup(QDialog):
         if self.save_button:
             self.save_button.clicked.connect(self.saver.save_all)
 
-        # 4. RTSP 프레임 로딩
-        try:
-            self.frame_original, self.resolution = load_rtsp_frame(self.ip, self)
-            self.drawer.set_frame(self.frame_original)
-            self.capture_image.image_width = self.resolution[0]
-            self.capture_image.image_height = self.resolution[1]
-        except Exception:
-            return  # 이미 QMessageBox 표시됨
+        # ✅ 기본 상태로 초기 설정 (아직 프레임 없음)
+        # self.drawer.set_frame(None)
 
-        # 5. ROI/알람/ISO 데이터 로딩
-        self.loader.load_all()
-
-        # 6. is_used 동기화 이벤트 연결
+        # ROI 동기화 및 핸들링 연결
         self._connect_usage_sync_signals()
-
-        # 7. ROI 표시
-        self.drawer.draw_rois_on_image()
         self.capture_image.on_roi_selected = self._on_roi_selected_from_image
         self.capture_image.on_roi_moved = self._on_roi_moved_from_image
-
-
-        # 8. ROI 좌표 셀 변경 시 ROI 이미지 자동 갱신
         self.roi_table.cellChanged.connect(self._on_roi_table_cell_changed)
-
-        # 9. Temperature value동기화
         self.alarm_table.itemChanged.connect(self._sync_alarm_to_iso)
         self.iso_table.itemChanged.connect(self._sync_iso_to_alarm)
+
+        # ROI 로딩 스레드 시작
+        self.loader_thread = ROILoaderThread(self.ip, self.user_id, self.user_pw)
+        self.loader_thread.finished.connect(self.on_loader_finished)
+        self.loader_thread.start()
+
 
     def _on_roi_selected_from_image(self, row):
         """이미지에서 ROI 클릭 시 테이블의 라디오 버튼 체크"""
@@ -141,3 +134,19 @@ class SetROIPopup(QDialog):
                     self.alarm_table.blockSignals(False)
             except Exception as e:
                 self.main_window.log(f"[ISO→알람 동기화 오류] row={row}: {e}")
+
+    @pyqtSlot()
+    def on_loader_finished(self):
+        # RTSP 프레임 적용
+        self.frame_original = self.loader_thread.frame
+        self.resolution = self.loader_thread.resolution
+        self.drawer.set_frame(self.frame_original)
+        self.capture_image.image_width = self.resolution[0]
+        self.capture_image.image_height = self.resolution[1]
+
+        # ROI 데이터를 로컬에 복사 (setattr 방식)
+        self.loader.roi_data = self.loader_thread.roi_list
+        self.loader.load_all()  # roi_data 있는 경우 이걸로 그림
+
+        self.drawer.draw_rois_on_image()
+        self.main_window.log("[로딩 완료] ROI + RTSP 프레임 반영됨")

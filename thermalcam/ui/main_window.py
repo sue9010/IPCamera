@@ -71,6 +71,7 @@ class OpenCVViewer(QMainWindow):
         self.yolo_button.setCheckable(True)
 
         self.start_button.clicked.connect(lambda: start_stream(self))
+        self.ip_input.returnPressed.connect(lambda: start_stream(self))
         self.stop_button.clicked.connect(lambda: stop_stream(self))
         self.search_button.clicked.connect(self.open_ip_selector)
         self.time_plot_button.clicked.connect(self.open_graph_viewer)

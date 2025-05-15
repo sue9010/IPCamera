@@ -74,7 +74,7 @@ class NUCControlPopup(QDialog):
 
             # ▼ nucmode
             nucmode_val = data.get("nucmode", "off")
-            print(f"[디버그] 서버 응답 nucmode 값: {nucmode_val}")
+            # print(f"[디버그] 서버 응답 nucmode 값: {nucmode_val}")
             if nucmode_val in [self.nuc_mode.itemText(i) for i in range(self.nuc_mode.count())]:
                 self.nuc_mode.setCurrentText(nucmode_val)
             else:
@@ -91,7 +91,7 @@ class NUCControlPopup(QDialog):
 
             # ▼ nucautosens
             nucsens_val = data.get("nucautosens", "middle")
-            print(f"[디버그] 서버 응답 nucautosens 값: {nucsens_val}")
+            # print(f"[디버그] 서버 응답 nucautosens 값: {nucsens_val}")
             if nucsens_val in [self.nuc_sens.itemText(i) for i in range(self.nuc_sens.count())]:
                 self.nuc_sens.setCurrentText(nucsens_val)
             else:

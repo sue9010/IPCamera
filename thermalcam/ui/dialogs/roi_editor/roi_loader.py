@@ -10,6 +10,7 @@ class ROILoader:
         self.roi_table = roi_table
         self.alarm_table = alarm_table
         self.iso_table = iso_table
+        self.roi_data = None
 
     def load_all(self):
         self.load_roi_data()
@@ -25,7 +26,7 @@ class ROILoader:
         self.radio_group = QButtonGroup()
         self.radio_group.setExclusive(True)
 
-        roi_list = fetch_all_rois(self.ip, self.user_id, self.user_pw) or [{} for _ in range(10)]
+        roi_list = self.roi_data or fetch_all_rois(self.ip, self.user_id, self.user_pw) or [{} for _ in range(10)]
 
         for row in range(10):
             roi = roi_list[row] if row < len(roi_list) else {}
