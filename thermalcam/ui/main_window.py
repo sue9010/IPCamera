@@ -95,7 +95,7 @@ class OpenCVViewer(QMainWindow):
 
         # 🔹 로딩 스피너 추가
         self.spinner = QLabel(self.video_label)
-        self.spinner.setFixedSize(640, 480)
+        self.spinner.setFixedSize(480, 480)
         self.spinner.setAlignment(Qt.AlignCenter)
         self.spinner.setScaledContents(True)
         self.spinner.setStyleSheet("background-color: rgba(0, 0, 0, 80); border-radius: 10px;")

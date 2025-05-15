@@ -181,8 +181,12 @@
         <height>480</height>
        </size>
       </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: black;
+</string>
+      </property>
       <property name="text">
-       <string>영상</string>
+       <string/>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>
