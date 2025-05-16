@@ -90,7 +90,7 @@ class EnhancementControlPopup(QDialog):
             self.chk_cie.setChecked(data.get("imgCIE", "off") == "on")
             self.cie_weight.setCurrentText(data.get("imgweightcie", "lowest"))
             self.chk_gamma.setChecked(data.get("gamma_use", "off") == "on")
-
+ 
             try:
                 self.gamma_param1.setValue(int(data.get("gamma_param1", 256)))
             except ValueError:

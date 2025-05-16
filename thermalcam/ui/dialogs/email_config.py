@@ -7,7 +7,7 @@ import json
 import os
 
 CONFIG_PATH = os.path.expanduser("~/.thermal_email_config.json")
-
+ 
 class EmailConfigPopup(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)

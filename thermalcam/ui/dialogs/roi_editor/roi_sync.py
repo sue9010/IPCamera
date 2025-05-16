@@ -19,7 +19,7 @@ class ROISyncManager:
                 if not table:
                     continue
                 widget = table.cellWidget(row, 0)
-                if not widget:
+                if not widget: 
                     continue
                 chk = widget.findChild(QCheckBox)
                 if chk and chk.isChecked() != (state == Qt.Checked):

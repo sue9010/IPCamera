@@ -18,7 +18,7 @@ class DisplayControlPopup(QDialog):
         self.chk_temp = QCheckBox("Show Temperature")
         self.chk_indicator = QCheckBox("Show Indicator")
         self.chk_colorbar = QCheckBox("Show Color Bar")
-
+ 
         # ▼ 버튼
         self.load_button = QPushButton("불러오기")
         self.load_button.clicked.connect(self.load_settings)

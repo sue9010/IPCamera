@@ -9,4 +9,4 @@ def main():
     sys.exit(app.exec_())  # ✅ 앱이 유지되려면 필수
 
 if __name__ == "__main__":
-    main()
+    main() 

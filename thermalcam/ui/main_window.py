@@ -280,7 +280,7 @@ class OpenCVViewer(QMainWindow):
         if self.graph_window is not None:
             self.graph_window.close()
         super().closeEvent(event)
-
+ 
     def toggle_yolo_detection(self, checked):
         self.yolo_enabled = checked
         if self.yolo_enabled:

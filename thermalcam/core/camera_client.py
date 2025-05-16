@@ -2,7 +2,7 @@ import socket
 import threading
 import json
 from thermalcam.core.alarm import evaluate_alarms
-
+  
 class ThermalReceiver(threading.Thread):
     def __init__(self, host, port, data_store, on_roi_refresh=None, roi_data=None):
         super().__init__(daemon=True)

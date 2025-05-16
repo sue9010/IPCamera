@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtCore import Qt, QPoint, QRect
 from PyQt5.QtGui import QPainter, QPen
-
+ 
 class ROICaptureLabel(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)

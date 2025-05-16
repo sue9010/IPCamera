@@ -4,7 +4,7 @@ from threading import Thread
 from collections import deque
 import cv2
 import time
-
+ 
 class FrameReader(Thread):
     def __init__(self, url, delay_sec):
         super().__init__(daemon=True)

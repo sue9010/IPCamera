@@ -28,3 +28,4 @@ class ROICaptureHandler:
                 break
 
         self.drawer.draw_rois_on_image()
+ 

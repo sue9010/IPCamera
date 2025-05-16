@@ -88,7 +88,7 @@ class NUCControlPopup(QDialog):
                 self.nuc_time.setCurrentIndex(index)
             else:
                 self.nuc_time.setCurrentIndex(1)  # default: 60s = 1분
-
+ 
             # ▼ nucautosens
             nucsens_val = data.get("nucautosens", "middle")
             # print(f"[디버그] 서버 응답 nucautosens 값: {nucsens_val}")

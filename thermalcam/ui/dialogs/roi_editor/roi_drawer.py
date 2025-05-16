@@ -19,7 +19,7 @@ class ROIDrawer:
     def draw_rois_on_image(self):
         if self.frame_original is None:
             return
-
+ 
         frame = self.frame_original.copy()
         for row in range(10):
             try:

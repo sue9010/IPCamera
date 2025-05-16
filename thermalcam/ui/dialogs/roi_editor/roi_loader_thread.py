@@ -12,7 +12,7 @@ class ROILoaderThread(QThread):
         self.frame = None
         self.resolution = (640, 480)
         self.roi_list = []
-
+ 
     def run(self):
         try:
             # RTSP 프레임 1장 캡처

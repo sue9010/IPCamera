@@ -33,3 +33,4 @@ def save_capture(rgb, timestamp):
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1, cv2.LINE_AA)
     cv2.imwrite(filepath, bgr)
     print(f"[YOLO 캡처] 저장됨: {filepath}")
+ 

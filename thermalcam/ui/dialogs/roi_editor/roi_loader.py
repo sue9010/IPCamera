@@ -15,7 +15,7 @@ class ROILoader:
     def load_all(self):
         self.load_roi_data()
         self.load_alarm_data()
-        self.load_iso_data()
+        self.load_iso_data() 
 
     def load_roi_data(self):
         self.roi_table.setRowCount(10)

@@ -46,7 +46,7 @@ def send_email(subject: str, body: str, main_window=None):
     try:
         with open(CONFIG_PATH, "r") as f:
             config = json.load(f)
-
+ 
         smtp_server = config.get("smtp_server")
         smtp_port = int(config.get("smtp_port", 587))
         sender_email = config.get("sender_email")

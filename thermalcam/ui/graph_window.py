@@ -27,7 +27,7 @@ class GraphCanvas(FigureCanvas):
         self.ax = self.fig.add_subplot(111)
         super().__init__(self.fig)
         self.setParent(parent)
-
+ 
         self.ax.set_xlim(0, WINDOW_DURATION)
         self.ax.set_ylim(TEMP_MIN, TEMP_MAX)
         self.ax.set_xlabel("Time (s)")

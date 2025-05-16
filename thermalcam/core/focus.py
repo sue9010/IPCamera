@@ -2,7 +2,7 @@
 import threading
 import requests
 import time
-
+ 
 class FocusController:
     def __init__(self, get_ip_func, get_speed_func, user_id='admin', password='admin'):
         self.get_ip = get_ip_func

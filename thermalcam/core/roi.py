@@ -56,7 +56,7 @@ def fetch_all_rois(ip, user_id, user_pw):
                 "used": roi_use,
                 "alarm": alarm_data,
                 "iso": iso_data
-            })
+            }) 
     except Exception as e:
         print(f"[fetch_all_rois] 예외 발생: {e}")
         return None

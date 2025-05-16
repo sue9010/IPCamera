@@ -30,3 +30,4 @@ def load_rtsp_frame(ip, parent=None):
         if parent:
             QMessageBox.critical(parent, "RTSP 오류", f"프레임 캡처 실패:\n{str(e)}")
         raise
+ 

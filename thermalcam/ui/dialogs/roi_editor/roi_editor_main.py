@@ -109,7 +109,7 @@ class SetROIPopup(QDialog):
             cy = self.capture_image.height() // 2 - self.spinner.height() // 2
             self.spinner.move(cx, cy)
 
-
+ 
     def _on_roi_selected_from_image(self, row):
         radio_widget = self.roi_table.cellWidget(row, 5)
         if radio_widget:

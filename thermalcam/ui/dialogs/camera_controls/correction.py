@@ -147,7 +147,7 @@ class CorrectionControlPopup(QDialog):
             "transmission": self.transmission.value(),
             "atmosphere": self.atmosphere.value(),
             "zerooffset": self.zero_offset.value()
-        }
+        } 
         try:
             resp = requests.get(url, params=params, timeout=3)
             if resp.status_code == 200 and "Error" not in resp.text:

@@ -146,3 +146,4 @@ class ImageControlPopup(QDialog):
                 QMessageBox.warning(self, "실패", f"설정 적용 실패:\n{resp.text}")
         except Exception as e:
             QMessageBox.critical(self, "예외 발생", str(e))
+ 

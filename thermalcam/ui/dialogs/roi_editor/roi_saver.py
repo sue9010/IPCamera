@@ -143,3 +143,4 @@ class ROISaver:
             self.parent.log("ROI 설정 변경")
         else:
             QMessageBox.warning(self.parent, "저장 실패", "일부 ROI 설정 저장에 실패했습니다.")
+ 

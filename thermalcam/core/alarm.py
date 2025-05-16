@@ -58,7 +58,7 @@ def evaluate_alarms(rois, thermal_data):
                     "temperature": temp,
                     "threshold": threshold,
                     "condition": "below"
-                })
+                }) 
 
         except Exception as e:
             print(f"[에러] ROI{idx} 알람 판별 중 오류: {e}")
