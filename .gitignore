@@ -1,3 +1,6 @@
+# 관리 파일
+프로젝트 관리/
+
 # 가상 환경
 venv/
 
@@ -17,3 +20,4 @@ __pycache__/
 
 thermalcam.zip
 
+yolov8n.pt
