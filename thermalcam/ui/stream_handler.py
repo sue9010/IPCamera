@@ -51,7 +51,7 @@ def connect_video_stream(viewer):
         on_roi_refresh=None,
         roi_data=viewer.roi_alarm_config 
     )
-    viewer.receiver.start() 
+    # viewer.receiver.start() 
 
     viewer.update_button_states(True)
     QTimer.singleShot(5000, lambda: check_stream_timeout(viewer))

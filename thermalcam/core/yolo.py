@@ -7,7 +7,7 @@ class YOLODetector:
         self.device = 'cpu'  # 강제로 CPU 사용
         self.model = YOLO(model_path).to(self.device)
 
-    def detect(self, frame): 
+    def detect(self, frame):
         results = self.model.predict(source=frame, device=self.device, verbose=False)
         boxes = results[0].boxes
         return boxes.xyxy.cpu().numpy(), boxes.conf.cpu().numpy()
