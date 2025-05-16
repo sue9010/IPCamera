@@ -1,0 +1,58 @@
+📄 .gitignore
+📄 requirements.txt
+📄 start.txt
+📄 structure.txt
+📁 thermalcam
+    📄 __init__.py
+    📄 cli.py
+    📁 core
+        📄 alarm.py
+        📄 camera_client.py
+        📄 focus.py
+        📄 frame_reader.py
+        📄 roi.py
+        📄 yolo.py
+    📁 resources
+        📁 icons
+            📄 spinner.gif
+            📄 spinner2.gif
+        📁 models
+            📄 yolov8n.pt
+        📁 ui
+            📄 roi.ui
+            📄 viewer.ui
+            📄 viewer.ui.old
+    📁 ui
+        📄 __init__.py
+        📁 dialogs
+            📄 __init__.py
+            📁 camera_controls
+                📄 __init__.py
+                📄 correction.py
+                📄 display.py
+                📄 enhancement.py
+                📄 image.py
+                📄 nuc.py
+            📄 ip_scanner.py
+            📁 roi_editor
+                📄 __init__.py
+                📄 roi_capture_handler.py
+                📄 roi_drawer.py
+                📄 roi_editor_main.py
+                📄 roi_loader.py
+                📄 roi_loader_thread.py
+                📄 roi_saver.py
+                📄 roi_sync.py
+                📄 rtsp_utils.py
+        📄 graph_window.py
+        📄 main_window.py
+        📄 roi_display_handler.py
+        📄 stream_handler.py
+        📁 widgets
+            📄 __init__.py
+            📄 roi_capture_widget.py
+        📄 yolo_handler.py
+📄 thermalcam.spec
+📄 tree.py
+📄 yolov8n.pt
+📄 버그리포트.txt

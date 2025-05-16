@@ -14,3 +14,6 @@ __pycache__/
 *.spec/
 *.pt/
 *.spec
+
+thermalcam.zip
+
