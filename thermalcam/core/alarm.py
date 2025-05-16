@@ -17,12 +17,13 @@ def fetch_alarm_conditions(ip, user_id, user_pw):
 
 # evaluate_alarms는 열화상 TCP/IP 수신 시마다 호출되어야 합니다.
 def evaluate_alarms(rois, thermal_data):
+    triggered = []
     for idx, roi in enumerate(rois):
         alarm = roi.get("alarm", {})
         use = alarm.get("alarm_use")
         condition = alarm.get("condition")
         threshold = alarm.get("temperature")
-        mode = alarm.get("mode", "maximum")  # maximum, minimum, average
+        mode = alarm.get("mode", "maximum")  # default to maximum
 
         if use != "on" or condition not in ("above", "below") or threshold is None:
             continue
@@ -42,15 +43,27 @@ def evaluate_alarms(rois, thermal_data):
 
             temp = float(data_entry[mode_key])
 
-            # if condition == "above" and temp > threshold:
-            #     print(f"[알람] ROI{idx}: {mode} {temp}℃ > 기준 {threshold}℃")
-            # elif condition == "below" and temp < threshold:
-            #     print(f"[알람] ROI{idx}: {mode} {temp}℃ < 기준 {threshold}℃")
+            if condition == "above" and temp > threshold:
+                triggered.append({
+                    "roi_id": idx,
+                    "mode": mode,
+                    "temperature": temp,
+                    "threshold": threshold,
+                    "condition": "above"
+                })
+            elif condition == "below" and temp < threshold:
+                triggered.append({
+                    "roi_id": idx,
+                    "mode": mode,
+                    "temperature": temp,
+                    "threshold": threshold,
+                    "condition": "below"
+                })
 
         except Exception as e:
             print(f"[에러] ROI{idx} 알람 판별 중 오류: {e}")
 
-
+    return triggered
 
 if __name__ == "__main__":
     # 예시 테스트용

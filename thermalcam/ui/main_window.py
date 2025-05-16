@@ -27,7 +27,11 @@ from thermalcam.ui.stream_handler import (
 from PyQt5.QtGui import QMovie
 from PyQt5.QtWidgets import QLabel
 import os
+import time
 from PyQt5.QtCore import Qt
+from thermalcam.ui.dialogs.email_config import EmailConfigPopup
+from thermalcam.core.alarm import evaluate_alarms
+from thermalcam.ui.alarm_handlers import show_popup, play_sound, send_email
 
 
 DELAY_SEC = 1
@@ -65,6 +69,13 @@ class OpenCVViewer(QMainWindow):
             get_ip_func=lambda: self.ip_input.text().strip(),
             get_speed_func=lambda: self.focusSpeedSlider.value()
         )
+        self.alarm_settings = {
+            "popup": False,
+            "sound": False,
+            "email": False,
+        }
+        self.last_alarm_time = 0 
+        self.should_draw_rois = False
         self.focusSpeedSlider.setMinimum(1)
         self.focusSpeedSlider.setMaximum(100)
         self.focusSpeedSlider.setValue(50)
@@ -73,6 +84,9 @@ class OpenCVViewer(QMainWindow):
         self.yolo_detector = None
         self.actionYolo.setCheckable(True)
         self.yolo_button.setCheckable(True)
+        self.popupAlarmButton.setCheckable(True)
+        self.soundAlarmButton.setCheckable(True)
+        self.emailAlarmButton.setCheckable(True)
 
         self.start_button.clicked.connect(lambda: start_stream(self))
         self.ip_input.returnPressed.connect(lambda: start_stream(self))
@@ -92,6 +106,10 @@ class OpenCVViewer(QMainWindow):
         self.focusOutButton.released.connect(self.focus_controller.stop_focus)
         self.yolo_button.clicked.connect(self.toggle_yolo_detection)
         self.log_console.moveCursor(QTextCursor.End)
+        self.popupAlarmButton.clicked.connect(self.toggle_popup_alarm)
+        self.soundAlarmButton.clicked.connect(self.toggle_sound_alarm)
+        self.emailAlarmButton.clicked.connect(self.toggle_email_alarm)
+        self.emailConfigButton.clicked.connect(self.open_email_config_popup)
 
         # 🔹 로딩 스피너 추가
         self.spinner = QLabel(self.video_label)
@@ -166,6 +184,56 @@ class OpenCVViewer(QMainWindow):
     def open_roi_popup(self):
         self.open_popup(SetROIPopup, "roi_popup")
 
+    def toggle_popup_alarm(self, checked):
+        self.alarm_settings["popup"] = checked
+        self.log(f"팝업 알람 {'ON' if checked else 'OFF'}")
+
+    def toggle_sound_alarm(self, checked):
+        self.alarm_settings["sound"] = checked
+        self.log(f"사운드 알람 {'ON' if checked else 'OFF'}")
+
+    def toggle_email_alarm(self, checked):
+        self.alarm_settings["email"] = checked
+        self.log(f"이메일 알람 {'ON' if checked else 'OFF'}")
+
+    def open_email_config_popup(self):
+        self.email_popup = EmailConfigPopup(self)
+        self.email_popup.exec_()
+                    
+    def check_alarm_trigger(self):
+        """알람 조건 평가 및 알림 실행"""
+        if not self.roi_alarm_config or not self.thermal_data:
+            return
+
+        # 3초 간격 제한
+        now = time.time()
+        if now - self.last_alarm_time < 3:
+            return  # 최근 알람 후 3초 이내이면 무시
+
+        triggered_rois = evaluate_alarms(self.roi_alarm_config, self.thermal_data)
+        if not triggered_rois:
+            return
+
+        self.last_alarm_time = now  # 알람 발생 시각 갱신
+
+        for roi in triggered_rois:
+            roi_id = roi["roi_id"]
+            temp = roi["temperature"]
+            threshold = roi["threshold"]
+            mode = roi["mode"]
+            cond = roi["condition"]
+
+            msg = f"[ROI {roi_id}] {mode} 온도 {temp:.1f}℃가 기준 {threshold:.1f}℃을 {'초과' if cond == 'above' else '미만'}했습니다."
+
+            if self.alarm_settings.get("popup"):
+                show_popup(msg, main_window=self)
+            if self.alarm_settings.get("sound"):
+                play_sound()
+            if self.alarm_settings.get("email"):
+                send_email("열화상 카메라 알람 발생", msg, main_window=self)
+
+            self.log(f"🔔 알람 발생: {msg}")
+    
     def update_button_states(self, connected):
         # 비연결 시 활성화할 위젯
         enable_when_disconnected = [
@@ -223,8 +291,6 @@ class OpenCVViewer(QMainWindow):
         else:
             self.yolo_button.setText("YOLO OFF")
             self.log("Yolo OFF")
-
-
 
     def log(self, message: str):
         timestamp = datetime.now().strftime("%H:%M:%S")

@@ -55,7 +55,8 @@ class ThermalReceiver(threading.Thread):
                                     evaluate_alarms(self.rois, self.data_store)
 
                             except Exception as e:
-                                print(f"[ThermalReceiver] JSON parse error: {e}")
+                                pass
+                                # print(f"[ThermalReceiver] JSON parse error: {e}")
 
                     except Exception as e:
                         print(f"[ThermalReceiver] Decode error: {e}")

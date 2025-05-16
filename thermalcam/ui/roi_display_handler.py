@@ -55,8 +55,9 @@ def process_roi_display(viewer, rgb, scale_x, scale_y):
             except:
                 continue
 
-    if viewer.rois:
+    if viewer.should_draw_rois and any(isinstance(roi, dict) and roi.get("used") for roi in viewer.rois):
         draw_rois(rgb, viewer.rois, viewer.thermal_data, scale_x, scale_y)
+
     else:
         pass
 

@@ -137,6 +137,7 @@ class ROISaver:
             if isinstance(self.parent, QMainWindow):
                 self.parent.rois = fetch_all_rois(self.ip, self.user_id, self.user_pw)
                 self.parent.roi_alarm_config = fetch_alarm_conditions(self.ip, self.user_id, self.user_pw)
+                self.parent.should_draw_rois = True
                 update_frame(self.parent)
                 QTimer.singleShot(100, lambda: update_frame(self.parent))
             self.parent.log("ROI 설정 변경")

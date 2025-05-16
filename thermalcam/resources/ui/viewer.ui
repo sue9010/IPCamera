@@ -107,7 +107,7 @@
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>54</height>
+           <height>100</height>
           </size>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
@@ -123,10 +123,31 @@
           <property name="bottomMargin">
            <number>0</number>
           </property>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="time_plot_button">
+          <item row="2" column="0">
+           <widget class="QPushButton" name="popupAlarmButton">
             <property name="text">
-             <string>Time plot</string>
+             <string>Popup Alarm</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="focusOutButton">
+            <property name="text">
+             <string>Focus Out</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="focusInButton">
+            <property name="text">
+             <string>Focus In</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QPushButton" name="soundAlarmButton">
+            <property name="text">
+             <string>Sound Alarm</string>
             </property>
            </widget>
           </item>
@@ -143,17 +164,24 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="focusInButton">
+          <item row="0" column="0">
+           <widget class="QPushButton" name="time_plot_button">
             <property name="text">
-             <string>Focus In</string>
+             <string>Time plot</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="focusOutButton">
+          <item row="3" column="0">
+           <widget class="QPushButton" name="emailAlarmButton">
             <property name="text">
-             <string>Focus Out</string>
+             <string>Email Alarm</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QPushButton" name="emailConfigButton">
+            <property name="text">
+             <string>Email config</string>
             </property>
            </widget>
           </item>
