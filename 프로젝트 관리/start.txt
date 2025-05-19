@@ -1,5 +1,5 @@
 python -m venv venv
-.\venv\Scripts\activate          
+.\venv310\Scripts\activate          
 python -m thermalcam.cli
 
 pip install -r requirements.txt
@@ -27,7 +27,9 @@ Show-Tree
 
 
 프로젝트 첫 빌드 (clean build)
-pyinstaller thermalcam/cli.py --noconsole --name thermalcam --add-data "thermalcam/resources/ui/roi.ui;thermalcam/resources/ui" --add-data "thermalcam/resources/ui/viewer.ui;thermalcam/resources/ui" --add-data "thermalcam/resources/models/yolov8n.pt;thermalcam/resources/models" --hidden-import PyQt5.sip
+pyinstaller thermalcam/cli.py --console --name thermalcam --add-data "thermalcam/resources/ui/roi.ui;thermalcam/resources/ui" --add-data "thermalcam/resources/ui/viewer.ui;thermalcam/resources/ui" --add-data "thermalcam/resources/models/yolov8n.pt;thermalcam/resources/models" --hidden-import PyQt5.sip
+
+pyinstaller --noconfirm --onefile --console --add-data "thermalcam/resources/ui;thermalcam/resources/ui" --add-data "thermalcam/resources/icons;thermalcam/resources/icons" --add-data "thermalcam/resources/models;thermalcam/resources/models" --add-data "thermalcam/resources/sound;thermalcam/resources/sound" thermalcam/cli.py
 
 
 이후 빌드

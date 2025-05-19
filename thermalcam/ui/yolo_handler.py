@@ -10,16 +10,19 @@ def handle_yolo_detection(viewer, rgb):
         from thermalcam.core.yolo import YOLODetector
         viewer.yolo_detector = YOLODetector()
 
-    boxes, scores = viewer.yolo_detector.detect(rgb)
-    filtered = [(b, s) for b, s in zip(boxes, scores) if s >= 0.5]
-    if filtered:
-        fb, fs = zip(*filtered)
-        rgb = viewer.yolo_detector.draw_detections(rgb, (np.array(fb), np.array(fs)))
+    # detect 함수가 coords, scores, class_ids를 반환하도록 수정됨
+    boxes, scores, class_ids = viewer.yolo_detector.detect(rgb)
+
+    if boxes.size > 0:
+        # draw_detections 함수도 class_ids까지 받도록 수정됨
+        rgb = viewer.yolo_detector.draw_detections(rgb, (boxes, scores, class_ids))
+
         now = datetime.datetime.now()
         if not hasattr(viewer, "last_capture_time") or viewer.last_capture_time is None or \
            (now - viewer.last_capture_time).total_seconds() > 2:
             save_capture(rgb, now)
             viewer.last_capture_time = now
+
     return rgb
 
 def save_capture(rgb, timestamp):
@@ -33,4 +36,3 @@ def save_capture(rgb, timestamp):
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1, cv2.LINE_AA)
     cv2.imwrite(filepath, bgr)
     print(f"[YOLO 캡처] 저장됨: {filepath}")
- 

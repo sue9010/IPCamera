@@ -107,7 +107,7 @@
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>100</height>
+           <height>130</height>
           </size>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
@@ -123,13 +123,6 @@
           <property name="bottomMargin">
            <number>0</number>
           </property>
-          <item row="2" column="0">
-           <widget class="QPushButton" name="popupAlarmButton">
-            <property name="text">
-             <string>Popup Alarm</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="1">
            <widget class="QPushButton" name="focusOutButton">
             <property name="text">
@@ -144,10 +137,24 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="0">
+           <widget class="QPushButton" name="popupAlarmButton">
+            <property name="text">
+             <string>Popup Alarm</string>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="1">
            <widget class="QPushButton" name="soundAlarmButton">
             <property name="text">
              <string>Sound Alarm</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QPushButton" name="emailConfigButton">
+            <property name="text">
+             <string>Email config</string>
             </property>
            </widget>
           </item>
@@ -178,10 +185,10 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QPushButton" name="emailConfigButton">
+          <item row="4" column="0">
+           <widget class="QPushButton" name="mediaPipeButton">
             <property name="text">
-             <string>Email config</string>
+             <string>PushButton</string>
             </property>
            </widget>
           </item>
