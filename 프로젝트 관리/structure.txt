@@ -1,7 +1,7 @@
 📄 .gitignore
 📄 requirements.txt
-📄 start.txt
 📄 structure.txt
+📄 test.py
 📁 thermalcam
     📄 __init__.py
     📄 cli.py
@@ -18,12 +18,16 @@
             📄 spinner2.gif
         📁 models
             📄 yolov8n.pt
+        📁 sound
+            📄 alarm.wav
         📁 ui
+            📄 email_config.ui
             📄 roi.ui
             📄 viewer.ui
-            📄 viewer.ui.old
+    📄 thermalcam.zip
     📁 ui
         📄 __init__.py
+        📄 alarm_handlers.py
         📁 dialogs
             📄 __init__.py
             📁 camera_controls
@@ -33,6 +37,7 @@
                 📄 enhancement.py
                 📄 image.py
                 📄 nuc.py
+            📄 email_config.py
             📄 ip_scanner.py
             📁 roi_editor
                 📄 __init__.py
@@ -52,7 +57,4 @@
             📄 __init__.py
             📄 roi_capture_widget.py
         📄 yolo_handler.py
-📄 thermalcam.spec
-📄 tree.py
 📄 yolov8n.pt
-📄 버그리포트.txt

@@ -22,7 +22,7 @@ function Show-Tree {
     }
 }
 
-$exclude = @("build", "dist", "venv", "__pycache__","api")
+$exclude = @("build", "dist", "venv", "__pycache__","api","프로젝트 관리")
 Show-Tree
 
 
