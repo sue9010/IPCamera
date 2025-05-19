@@ -154,8 +154,8 @@ def update_frame(viewer):
         viewer.video_label.setPixmap(QPixmap.fromImage(image))
         viewer.stream_start_time = time.time()
 
-        # if self.mediapipe_enabled and self.pose_detector:
-        #     rgb = self.pose_detector.detect_and_draw(rgb)
+        if viewer.mediapipe_enabled and viewer.pose_detector:
+            rgb = viewer.pose_detector.detect_and_draw(rgb)
 
         # ✅ 알람 조건 평가 및 트리거
         if hasattr(viewer, "check_alarm_trigger"):

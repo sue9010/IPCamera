@@ -10,15 +10,19 @@ def main():
 
 if __name__ == "__main__":
     try:
-        from thermalcam.ui.main_window import OpenCVViewer
-        from PyQt5.QtWidgets import QApplication
         import sys
+        from PyQt5.QtWidgets import QApplication
+        from thermalcam.ui.main_window import OpenCVViewer
 
         app = QApplication(sys.argv)
+
         viewer = OpenCVViewer()
+
         viewer.show()
+
         sys.exit(app.exec_())
+
     except Exception as e:
-        with open("error_log.txt", "w") as f:
+        with open("error_log.txt", "w", encoding="utf-8") as f:
             import traceback
             f.write(traceback.format_exc())

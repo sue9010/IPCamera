@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "E:\Coding_practice\ipDataReceiver\thermalcam\cli.py", line 21, in <module>
+    viewer = OpenCVViewer()
+  File "E:\Coding_practice\ipDataReceiver\thermalcam\ui\main_window.py", line 94, in __init__
+    self.mediaPipeButton.setCheckable(True)
+AttributeError: 'OpenCVViewer' object has no attribute 'mediaPipeButton'

@@ -32,7 +32,7 @@ from PyQt5.QtCore import Qt
 from thermalcam.ui.dialogs.email_config import EmailConfigPopup
 from thermalcam.core.alarm import evaluate_alarms
 from thermalcam.ui.alarm_handlers import show_popup, play_sound, send_email
-# from thermalcam.core.media_pipe import MediaPipePoseDetector
+from thermalcam.core.media_pipe import MediaPipePoseDetector
 
 DELAY_SEC = 1
 DEFAULT_IP   = "192.168.0.56"
@@ -85,10 +85,10 @@ class OpenCVViewer(QMainWindow):
         self.actionYolo.setCheckable(True)
         self.yolo_button.setCheckable(True)
 
-        # self.mediapipe_enabled = False
-        # self.pose_detector = None
-        # self.mediaPipButton.setCheckable(True)
-        # self.mediaPipButton.clicked.connect(self.toggle_mediapipe_detection)
+        self.mediapipe_enabled = False
+        self.pose_detector = None
+        self.mediaPipeButton.setCheckable(True)
+        self.mediaPipeButton.clicked.connect(self.toggle_mediapipe_detection)
 
         self.popupAlarmButton.setCheckable(True)
         self.soundAlarmButton.setCheckable(True)
@@ -138,16 +138,16 @@ class OpenCVViewer(QMainWindow):
 
         init_roi_labels(self)
 
-    # def toggle_mediapipe_detection(self, checked):
-    #     self.mediapipe_enabled = checked
-    #     if self.mediapipe_enabled:
-    #         if self.pose_detector is None:
-    #             self.pose_detector = MediaPipePoseDetector()
-    #         self.mediaPipButton.setText("MediaPipe ON")
-    #         self.log("MediaPipe 포즈 인식 활성화됨")
-    #     else:
-    #         self.mediaPipButton.setText("MediaPipe OFF")
-    #         self.log("MediaPipe 포즈 인식 비활성화됨")
+    def toggle_mediapipe_detection(self, checked):
+        self.mediapipe_enabled = checked
+        if self.mediapipe_enabled:
+            if self.pose_detector is None:
+                self.pose_detector = MediaPipePoseDetector()
+            self.mediaPipeButton.setText("MediaPipe ON")
+            self.log("MediaPipe 포즈 인식 활성화됨")
+        else:
+            self.mediaPipeButton.setText("MediaPipe OFF")
+            self.log("MediaPipe 포즈 인식 비활성화됨")
 
     def open_roi_popup(self):
         ip = self.ip_input.text().strip()
