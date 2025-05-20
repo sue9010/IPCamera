@@ -2,7 +2,7 @@
 
 import cv2
 import time
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QLabel, QMessageBox
 from thermalcam.core.roi import fetch_all_rois
@@ -101,6 +101,7 @@ def get_current_frame(viewer):
         return viewer.reader.get_delayed()
     return None
 
+
 def update_frame(viewer):
     frame = get_current_frame(viewer)
     if frame is not None:
@@ -109,6 +110,7 @@ def update_frame(viewer):
         if viewer.spinner.isVisible():
             viewer.spinner.hide()
             viewer.spinner_movie.stop()
+
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         h, w, ch = rgb.shape
         bytes_per_line = ch * w
@@ -130,8 +132,12 @@ def update_frame(viewer):
         if viewer.mediapipe_enabled and viewer.pose_detector and person_present:
             rgb = viewer.pose_detector.detect_and_draw(rgb)
 
+        # ✅ QLabel 크기에 맞게 QPixmap 리사이즈 (비율 유지)
         image = QImage(rgb.data, w, h, bytes_per_line, QImage.Format_RGB888)
-        viewer.video_label.setPixmap(QPixmap.fromImage(image))
+        pixmap = QPixmap.fromImage(image)
+        scaled_pixmap = pixmap.scaled(viewer.video_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        viewer.video_label.setPixmap(scaled_pixmap)
+
         viewer.stream_start_time = time.time()
 
         # ✅ 알람 조건 평가 및 트리거

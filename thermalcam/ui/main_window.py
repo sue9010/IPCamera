@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QMainWindow,QMessageBox, 
+    QMainWindow,QMessageBox,QHBoxLayout, QSizePolicy 
 )
 from PyQt5.QtCore import QTimer
 import os
@@ -349,4 +349,7 @@ class OpenCVViewer(QMainWindow):
             cx = self.video_label.width() // 2 - self.spinner.width() // 2
             cy = self.video_label.height() // 2 - self.spinner.height() // 2
             self.spinner.move(cx, cy)
+
+        # 영상 리사이즈 대응용 스케일 조정 (선택)
+        self.video_label.update()
 

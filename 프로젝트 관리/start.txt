@@ -39,7 +39,7 @@ pyinstaller --noconfirm --onedir --console --add-data "thermalcam/resources/ui;t
 pyinstaller --noconfirm --onedir --console --distpath dist/ver3 --add-data "thermalcam/resources/ui;thermalcam/resources/ui" --add-data "thermalcam/resources/icons;thermalcam/resources/icons" --add-data "thermalcam/resources/models;thermalcam/resources/models" --add-data "thermalcam/resources/sound;thermalcam/resources/sound" --collect-all mediapipe --collect-all ultralytics --collect-all torch --collect-all cv2 thermalcam/cli.py
 
 하위 디렉토리 포함 dir로 빌드
-pyinstaller --noconfirm --onedir --console --distpath dist/ver3 --add-data "thermalcam/resources/ui;thermalcam/resources/ui" --add-data "thermalcam/resources/icons;thermalcam/resources/icons" --add-data "thermalcam/resources/models;thermalcam/resources/models" --add-data "thermalcam/resources/sound;thermalcam/resources/sound" --collect-all mediapipe --collect-all ultralytics --collect-all torch --collect-all cv2 thermalcam/cli.py
+pyinstaller --noconfirm --onedir --console --distpath dist/ver4 --add-data "thermalcam/resources/ui;thermalcam/resources/ui" --add-data "thermalcam/resources/icons;thermalcam/resources/icons" --add-data "thermalcam/resources/models;thermalcam/resources/models" --add-data "thermalcam/resources/sound;thermalcam/resources/sound" --collect-all mediapipe --collect-all ultralytics --collect-all torch --collect-all cv2 thermalcam/cli.py
 
 
 
