@@ -140,14 +140,36 @@ class OpenCVViewer(QMainWindow):
 
     def toggle_mediapipe_detection(self, checked):
         self.mediapipe_enabled = checked
+
         if self.mediapipe_enabled:
+            # YOLO 강제 활성화
+            if not self.yolo_enabled:
+                self.yolo_enabled = True
+                self.yolo_button.setChecked(True)
+                if self.yolo_detector is None:
+                    self.yolo_detector = YOLODetector()
+                self.yolo_button.setText("YOLO ON")
+                self.log("MediaPipe를 위해 YOLO 자동 활성화됨")
+
+            # MediaPipe 활성화
             if self.pose_detector is None:
-                self.pose_detector = MediaPipePoseDetector()
+                self.pose_detector = MediaPipePoseDetector(main_window=self)
             self.mediaPipeButton.setText("MediaPipe ON")
             self.log("MediaPipe 포즈 인식 활성화됨")
+
         else:
+            # MediaPipe 비활성화
             self.mediaPipeButton.setText("MediaPipe OFF")
             self.log("MediaPipe 포즈 인식 비활성화됨")
+
+            # YOLO도 함께 끄기
+            if self.yolo_enabled:
+                self.yolo_enabled = False
+                self.yolo_button.setChecked(False)
+                self.yolo_button.setText("YOLO OFF")
+                self.log("MediaPipe 해제로 인해 YOLO도 비활성화됨")
+
+
 
     def open_roi_popup(self):
         ip = self.ip_input.text().strip()

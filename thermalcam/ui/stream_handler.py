@@ -117,45 +117,22 @@ def update_frame(viewer):
         scale_y = viewer.video_label.height() / rgb.shape[0]
         process_roi_display(viewer, rgb, scale_x, scale_y)
 
+        person_present = False
         if viewer.yolo_enabled:
             from thermalcam.ui.yolo_handler import handle_yolo_detection
-            rgb = handle_yolo_detection(viewer, rgb)
+            # YOLO 감지 (coords, confs, class_ids 포함)
+            boxes, scores, class_ids = viewer.yolo_detector.detect(rgb)
+            if any(cls == 0 for cls in class_ids):  # class_id 0은 사람
+                person_present = True
+            rgb = viewer.yolo_detector.draw_detections(rgb, (boxes, scores, class_ids))
 
-        # 아래 주석 처리된 코드는, 
-        # 1. ROI 내부에서 사람이 인식 되었을 경우 log를 내보내며 , 
-        # 2. 평균 온도가 37.5 도 이상 일 경우 log를 내보내는 샘플코드임.
-
-        # if viewer.yolo_enabled:
-        #     from thermalcam.ui.yolo_handler import handle_yolo_detection
-        #     rgb = handle_yolo_detection(viewer, rgb)
-
-        #     # ROI 매핑 및 온도 기반 경고 출력
-        #     coords, confs = viewer.yolo_detector.detect(rgb)
-        #     for (x1, y1, x2, y2), conf in zip(coords, confs):
-        #         cx = int((x1 + x2) / 2)
-        #         cy = int((y1 + y2) / 2)
-
-        #         for idx, roi in enumerate(viewer.rois):
-        #             if not roi["used"]:
-        #                 continue
-        #             sx, sy, ex, ey = roi["coords"]
-        #             if sx <= cx <= ex and sy <= cy <= ey:
-        #                 temp_data = viewer.thermal_data.get(idx)
-        #                 if temp_data:
-        #                     avg_temp = float(temp_data.get("avr", 0))
-        #                     log_msg = f"[ROI {idx}] 사람 인식됨 → Max: {temp_data['max']} / Min: {temp_data['min']} / Avg: {avg_temp}"
-        #                     viewer.log(log_msg)
-
-        #                     if avg_temp >= 37.5:
-        #                         viewer.log(f"[⚠️ 경고] ROI {idx} 평균 온도 {avg_temp:.1f}°C ≥ 37.5°C → 체온 이상 감지")
-        #                 break  # 중복 방지
+        # 사람 있을 때만 MediaPipe 실행
+        if viewer.mediapipe_enabled and viewer.pose_detector and person_present:
+            rgb = viewer.pose_detector.detect_and_draw(rgb)
 
         image = QImage(rgb.data, w, h, bytes_per_line, QImage.Format_RGB888)
         viewer.video_label.setPixmap(QPixmap.fromImage(image))
         viewer.stream_start_time = time.time()
-
-        if viewer.mediapipe_enabled and viewer.pose_detector:
-            rgb = viewer.pose_detector.detect_and_draw(rgb)
 
         # ✅ 알람 조건 평가 및 트리거
         if hasattr(viewer, "check_alarm_trigger"):
