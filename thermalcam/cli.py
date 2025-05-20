@@ -14,12 +14,13 @@ if __name__ == "__main__":
         from PyQt5.QtWidgets import QApplication
         from thermalcam.ui.main_window import OpenCVViewer
 
+        print("[CLI] QApplication 시작")
         app = QApplication(sys.argv)
-
+        print("[CLI] OpenCVViewer 생성")
         viewer = OpenCVViewer()
-
+        print("[CLI] viewer.show() 호출")
         viewer.show()
-
+        print("[CLI] 이벤트 루프 진입")
         sys.exit(app.exec_())
 
     except Exception as e:

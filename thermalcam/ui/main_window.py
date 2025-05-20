@@ -50,9 +50,11 @@ def resource_path(relative_path):
 class OpenCVViewer(QMainWindow):
     def __init__(self):
         super().__init__()
+        print("[Viewer] UI 파일 로딩 중...")
         with importlib.resources.path("thermalcam.resources.ui", "viewer.ui") as ui_file:
             uic.loadUi(str(ui_file), self)
 
+        print("[Viewer] 기본 속성 초기화")
         self.reader = None
         self.DELAY_SEC = 1
         self.THERMAL_PORT = 60110
@@ -85,11 +87,13 @@ class OpenCVViewer(QMainWindow):
         self.actionYolo.setCheckable(True)
         self.yolo_button.setCheckable(True)
 
+        print("[Viewer] MediaPipe 속성 초기화")
         self.mediapipe_enabled = False
         self.pose_detector = None
+        print("[Viewer] 버튼 설정 연결")
         self.mediaPipeButton.setCheckable(True)
         self.mediaPipeButton.clicked.connect(self.toggle_mediapipe_detection)
-
+        print("[Viewer] 나머지 UI 및 연결 초기화 완료")
         self.popupAlarmButton.setCheckable(True)
         self.soundAlarmButton.setCheckable(True)
         self.emailAlarmButton.setCheckable(True)
