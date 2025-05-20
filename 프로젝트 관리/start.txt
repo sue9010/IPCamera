@@ -35,7 +35,7 @@ pyinstaller --noconfirm --onefile --console --add-data "thermalcam/resources/ui;
 yolo, mdeia pipe, console 포함 빌드
 pyinstaller --noconfirm --onedir --console --add-data "thermalcam/resources/ui;thermalcam/resources/ui" --add-data "thermalcam/resources/icons;thermalcam/resources/icons" --add-data "thermalcam/resources/models;thermalcam/resources/models" --add-data "thermalcam/resources/sound;thermalcam/resources/sound" thermalcam/cli.py
 
-폴더명 직접 지정
+# ver3: 완전한 의존성 포함, MediaPipe 및 YOLO 모두 지원
 pyinstaller --noconfirm --onedir --console --distpath dist/ver3 --add-data "thermalcam/resources/ui;thermalcam/resources/ui" --add-data "thermalcam/resources/icons;thermalcam/resources/icons" --add-data "thermalcam/resources/models;thermalcam/resources/models" --add-data "thermalcam/resources/sound;thermalcam/resources/sound" --collect-all mediapipe --collect-all ultralytics --collect-all torch --collect-all cv2 thermalcam/cli.py
 
 하위 디렉토리 포함 dir로 빌드

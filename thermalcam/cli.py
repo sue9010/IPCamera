@@ -24,6 +24,8 @@ if __name__ == "__main__":
         sys.exit(app.exec_())
 
     except Exception as e:
+        print(f"[CLI] 오류 발생: {str(e)}")
+        print("[CLI] 자세한 오류는 error_log.txt 파일을 확인하세요.")
         with open("error_log.txt", "w", encoding="utf-8") as f:
             import traceback
             f.write(traceback.format_exc())
