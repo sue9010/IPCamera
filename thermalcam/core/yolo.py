@@ -1,11 +1,24 @@
-from ultralytics import YOLO
+import os
+import sys
 import cv2
 import numpy as np
+from ultralytics import YOLO
+
+def resource_path(relative_path):
+    try:
+        # PyInstaller 실행 환경
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # 개발 중 실행 환경
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 class YOLODetector:
-    def __init__(self, model_path='yolov8n.pt'):
+    def __init__(self, model_path='thermalcam/resources/models/yolov8n.pt'):
         self.device = 'cpu'
-        self.model = YOLO(model_path).to(self.device)
+        model_full_path = resource_path(model_path)
+        self.model = YOLO(model_full_path).to(self.device)
+
         self.allowed_classes = {
             0,   # person
             15,  # cat
@@ -26,7 +39,6 @@ class YOLODetector:
         confs = boxes.conf.cpu().numpy()
         class_ids = boxes.cls.cpu().numpy().astype(int)
 
-        # 사람과 주요 동물 클래스만 필터링
         filtered = [(c, conf, cls_id) for c, conf, cls_id in zip(coords, confs, class_ids)
                     if cls_id in self.allowed_classes and conf >= 0.5]
 

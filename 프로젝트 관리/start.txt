@@ -29,7 +29,18 @@ Show-Tree
 프로젝트 첫 빌드 (clean build)
 pyinstaller thermalcam/cli.py --console --name thermalcam --add-data "thermalcam/resources/ui/roi.ui;thermalcam/resources/ui" --add-data "thermalcam/resources/ui/viewer.ui;thermalcam/resources/ui" --add-data "thermalcam/resources/models/yolov8n.pt;thermalcam/resources/models" --hidden-import PyQt5.sip
 
+yolo 포함 console 포함 빌드
 pyinstaller --noconfirm --onefile --console --add-data "thermalcam/resources/ui;thermalcam/resources/ui" --add-data "thermalcam/resources/icons;thermalcam/resources/icons" --add-data "thermalcam/resources/models;thermalcam/resources/models" --add-data "thermalcam/resources/sound;thermalcam/resources/sound" thermalcam/cli.py
+
+yolo, mdeia pipe, console 포함 빌드
+pyinstaller --noconfirm --onedir --console --add-data "thermalcam/resources/ui;thermalcam/resources/ui" --add-data "thermalcam/resources/icons;thermalcam/resources/icons" --add-data "thermalcam/resources/models;thermalcam/resources/models" --add-data "thermalcam/resources/sound;thermalcam/resources/sound" thermalcam/cli.py
+
+폴더명 직접 지정
+pyinstaller --noconfirm --onedir --console --distpath dist/ver3 --add-data "thermalcam/resources/ui;thermalcam/resources/ui" --add-data "thermalcam/resources/icons;thermalcam/resources/icons" --add-data "thermalcam/resources/models;thermalcam/resources/models" --add-data "thermalcam/resources/sound;thermalcam/resources/sound" --collect-all mediapipe --collect-all ultralytics --collect-all torch --collect-all cv2 thermalcam/cli.py
+
+하위 디렉토리 포함 dir로 빌드
+pyinstaller --noconfirm --onedir --console --distpath dist/ver3 --add-data "thermalcam/resources/ui;thermalcam/resources/ui" --add-data "thermalcam/resources/icons;thermalcam/resources/icons" --add-data "thermalcam/resources/models;thermalcam/resources/models" --add-data "thermalcam/resources/sound;thermalcam/resources/sound" --collect-all mediapipe --collect-all ultralytics --collect-all torch --collect-all cv2 thermalcam/cli.py
+
 
 
 이후 빌드
