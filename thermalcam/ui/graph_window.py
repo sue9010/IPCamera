@@ -1,16 +1,17 @@
-import sys
 import json
 import socket
+import sys
 import threading
 import time
-from collections import deque, defaultdict
+from collections import defaultdict, deque
 
-from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QVBoxLayout, QWidget, QMessageBox, QScrollBar
-)
-from PyQt5.QtCore import QTimer, Qt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import \
+    FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QMessageBox,
+                             QScrollBar, QVBoxLayout, QWidget)
+
 from thermalcam.core.camera_client import ThermalReceiver
 
 TARGET_PORT = 60110

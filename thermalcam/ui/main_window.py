@@ -1,49 +1,46 @@
 # 🔹 표준 라이브러리
+import importlib.resources
 import os
 import sys
 import time
-import importlib.resources
 from datetime import datetime
 
 # 🔹 외부 라이브러리
 import cv2
 import numpy as np
-
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QImage, QPixmap, QMovie, QTextCursor
-from PyQt5.QtWidgets import (
-    QMainWindow, QLabel, QMessageBox, QHBoxLayout, QSizePolicy
-)
+from PyQt5.QtGui import QImage, QMovie, QPixmap, QTextCursor
+from PyQt5.QtWidgets import QHBoxLayout, QLabel, QMainWindow, QMessageBox, QSizePolicy
+
+from thermalcam.core.alarm import evaluate_alarms
 
 # 🔹 thermalcam.core
 from thermalcam.core.focus import FocusController
-from thermalcam.core.yolo import YOLODetector
-from thermalcam.core.alarm import evaluate_alarms
 from thermalcam.core.media_pipe import MediaPipePoseDetector
+from thermalcam.core.yolo import YOLODetector
+from thermalcam.ui.alarm_handlers import play_sound, send_email, show_popup
+from thermalcam.ui.dialogs.camera_controls.correction import CorrectionControlPopup
+from thermalcam.ui.dialogs.camera_controls.display import DisplayControlPopup
+from thermalcam.ui.dialogs.camera_controls.enhancement import EnhancementControlPopup
+from thermalcam.ui.dialogs.camera_controls.image import ImageControlPopup
+from thermalcam.ui.dialogs.camera_controls.nuc import NUCControlPopup
+from thermalcam.ui.dialogs.email_config import EmailConfigPopup
 
 # 🔹 thermalcam.ui.dialogs
 from thermalcam.ui.dialogs.ip_scanner import IPSelectorPopup
-from thermalcam.ui.dialogs.email_config import EmailConfigPopup
-from thermalcam.ui.dialogs.camera_controls.image import ImageControlPopup
-from thermalcam.ui.dialogs.camera_controls.display import DisplayControlPopup
-from thermalcam.ui.dialogs.camera_controls.enhancement import EnhancementControlPopup
-from thermalcam.ui.dialogs.camera_controls.correction import CorrectionControlPopup
-from thermalcam.ui.dialogs.camera_controls.nuc import NUCControlPopup
 from thermalcam.ui.dialogs.roi_editor import SetROIPopup
 
 # 🔹 thermalcam.ui
 from thermalcam.ui.graph_window import GraphWindow
 from thermalcam.ui.roi_display_handler import init_roi_labels
 from thermalcam.ui.stream_handler import start_stream, stop_stream, update_frame
-from thermalcam.ui.alarm_handlers import show_popup, play_sound, send_email
-
-
 
 DELAY_SEC = 1
-DEFAULT_IP   = "192.168.0.56"
+DEFAULT_IP = "192.168.0.56"
 DEFAULT_PORT = "554"
 THERMAL_PORT = 60110
+
 
 def resource_path(relative_path):
     try:
@@ -57,7 +54,9 @@ class OpenCVViewer(QMainWindow):
     def __init__(self):
         super().__init__()
         print("[Viewer] UI 파일 로딩 중...")
-        with importlib.resources.path("thermalcam.resources.ui", "viewer.ui") as ui_file:
+        with importlib.resources.path(
+            "thermalcam.resources.ui", "viewer.ui"
+        ) as ui_file:
             uic.loadUi(str(ui_file), self)
 
         print("[Viewer] 기본 속성 초기화")
@@ -75,14 +74,14 @@ class OpenCVViewer(QMainWindow):
         self.graph_window = None
         self.focus_controller = FocusController(
             get_ip_func=lambda: self.ip_input.text().strip(),
-            get_speed_func=lambda: self.focusSpeedSlider.value()
+            get_speed_func=lambda: self.focusSpeedSlider.value(),
         )
         self.alarm_settings = {
             "popup": False,
             "sound": False,
             "email": False,
         }
-        self.last_alarm_time = 0 
+        self.last_alarm_time = 0
         self.should_draw_rois = False
         self.focusSpeedSlider.setMinimum(1)
         self.focusSpeedSlider.setMaximum(100)
@@ -119,9 +118,13 @@ class OpenCVViewer(QMainWindow):
         self.actionNUC.triggered.connect(self.open_nuc_control_popup)
         # self.nuc_button.clicked.connect(self.handle_nuc_once)
         self.actionSet_ROI.triggered.connect(self.open_roi_popup)
-        self.focusInButton.pressed.connect(lambda: self.focus_controller.start_focus("in"))
+        self.focusInButton.pressed.connect(
+            lambda: self.focus_controller.start_focus("in")
+        )
         self.focusInButton.released.connect(self.focus_controller.stop_focus)
-        self.focusOutButton.pressed.connect(lambda: self.focus_controller.start_focus("out"))
+        self.focusOutButton.pressed.connect(
+            lambda: self.focus_controller.start_focus("out")
+        )
         self.focusOutButton.released.connect(self.focus_controller.stop_focus)
         self.yolo_button.clicked.connect(self.toggle_yolo_detection)
         self.log_console.moveCursor(QTextCursor.End)
@@ -137,11 +140,14 @@ class OpenCVViewer(QMainWindow):
         self.spinner.setFixedSize(480, 480)
         self.spinner.setAlignment(Qt.AlignCenter)
         self.spinner.setScaledContents(True)
-        self.spinner.setStyleSheet("background-color: rgba(0, 0, 0, 80); border-radius: 10px;")
+        self.spinner.setStyleSheet(
+            "background-color: rgba(0, 0, 0, 80); border-radius: 10px;"
+        )
 
-        spinner_path = os.path.join(os.path.dirname(__file__), "../resources/icons/spinner.gif")
+        spinner_path = os.path.join(
+            os.path.dirname(__file__), "../resources/icons/spinner.gif"
+        )
         spinner_path = os.path.normpath(spinner_path)
-
 
         self.spinner_movie = QMovie(spinner_path)
         self.spinner.setMovie(self.spinner_movie)
@@ -174,8 +180,10 @@ class OpenCVViewer(QMainWindow):
             height = pixmap.height()
 
             # fourcc 및 VideoWriter 객체 생성
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            self.video_writer = cv2.VideoWriter(self.recording_path, fourcc, 20.0, (width, height))
+            fourcc = cv2.VideoWriter_fourcc(*"XVID")
+            self.video_writer = cv2.VideoWriter(
+                self.recording_path, fourcc, 20.0, (width, height)
+            )
 
             self.is_recording = True
             self.recordingButton.setText("Recording ON")
@@ -190,7 +198,6 @@ class OpenCVViewer(QMainWindow):
             self.is_recording = False
             self.recordingButton.setText("Recording Stop")
             self.log(f"[녹화 저장 완료] {self.recording_path}")
-
 
     def capture_screenshot(self):
         if not hasattr(self, "video_label") or self.video_label.pixmap() is None:
@@ -221,7 +228,6 @@ class OpenCVViewer(QMainWindow):
 
         # 로그 출력
         self.log(f"[스크린샷 저장] {filepath}")
-
 
     def toggle_mediapipe_detection(self, checked):
         self.mediapipe_enabled = checked
@@ -254,8 +260,6 @@ class OpenCVViewer(QMainWindow):
                 self.yolo_button.setText("YOLO OFF")
                 self.log("MediaPipe 해제로 인해 YOLO도 비활성화됨")
 
-
-
     def open_roi_popup(self):
         ip = self.ip_input.text().strip()
         user_id = self.id_input.text().strip()
@@ -265,12 +269,14 @@ class OpenCVViewer(QMainWindow):
             QMessageBox.warning(self, "입력 오류", "IP, ID, PW를 모두 입력하세요.")
             return
 
-        self.roi_popup = SetROIPopup(ip, user_id, user_pw, main_window=self, parent=self)
+        self.roi_popup = SetROIPopup(
+            ip, user_id, user_pw, main_window=self, parent=self
+        )
 
         self.roi_popup.show()
 
     def handle_nuc_once(self):
-        pass # TODO: NUC 즉시 실행 기능 추후 구현
+        pass  # TODO: NUC 즉시 실행 기능 추후 구현
 
     def get_ip_auth(self):
         ip = self.ip_input.text().strip()
@@ -322,7 +328,7 @@ class OpenCVViewer(QMainWindow):
     def open_email_config_popup(self):
         self.email_popup = EmailConfigPopup(self)
         self.email_popup.exec_()
-                    
+
     def check_alarm_trigger(self):
         """알람 조건 평가 및 알림 실행"""
         if not self.roi_alarm_config or not self.thermal_data:
@@ -356,7 +362,7 @@ class OpenCVViewer(QMainWindow):
                 send_email("열화상 카메라 알람 발생", msg, main_window=self)
 
             self.log(f"🔔 알람 발생: {msg}")
-    
+
     def update_button_states(self, connected):
         # 비연결 시 활성화할 위젯
         enable_when_disconnected = [
@@ -366,7 +372,7 @@ class OpenCVViewer(QMainWindow):
             self.id_input,
             self.pw_input,
         ]
-        
+
         # 연결 시 활성화할 위젯
         enable_when_connected = [
             self.stop_button,
@@ -381,7 +387,7 @@ class OpenCVViewer(QMainWindow):
             self.popupAlarmButton,
             self.soundAlarmButton,
             self.emailAlarmButton,
-            self.emailConfigButton
+            self.emailConfigButton,
         ]
 
         for widget in enable_when_disconnected:
@@ -410,7 +416,7 @@ class OpenCVViewer(QMainWindow):
         if self.graph_window is not None:
             self.graph_window.close()
         super().closeEvent(event)
- 
+
     def toggle_yolo_detection(self, checked):
         self.yolo_enabled = checked
         if self.yolo_enabled:
@@ -440,4 +446,3 @@ class OpenCVViewer(QMainWindow):
 
         # 영상 리사이즈 대응용 스케일 조정 (선택)
         self.video_label.update()
-
