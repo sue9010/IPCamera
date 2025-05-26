@@ -123,10 +123,10 @@
           <property name="bottomMargin">
            <number>0</number>
           </property>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="focusOutButton">
+          <item row="2" column="0">
+           <widget class="QPushButton" name="popupAlarmButton">
             <property name="text">
-             <string>Focus Out</string>
+             <string>Popup Alarm</string>
             </property>
            </widget>
           </item>
@@ -137,17 +137,17 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QPushButton" name="popupAlarmButton">
-            <property name="text">
-             <string>Popup Alarm</string>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="1">
            <widget class="QPushButton" name="soundAlarmButton">
             <property name="text">
              <string>Sound Alarm</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="focusOutButton">
+            <property name="text">
+             <string>Focus Out</string>
             </property>
            </widget>
           </item>
@@ -162,26 +162,6 @@
            <widget class="QPushButton" name="emailAlarmButton">
             <property name="text">
              <string>Email Alarm</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QPushButton" name="mediaPipeButton">
-            <property name="text">
-             <string>Media pipe OFF</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QPushButton" name="yolo_button">
-            <property name="styleSheet">
-             <string notr="true"/>
-            </property>
-            <property name="text">
-             <string>Yolo OFF</string>
-            </property>
-            <property name="checkable">
-             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -243,6 +223,52 @@
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QWidget" name="widget_3" native="true">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>66</height>
+          </size>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QPushButton" name="yolo_button">
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>Yolo OFF</string>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="mediaPipeButton">
+            <property name="text">
+             <string>Media pipe OFF</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="recordingButton">
+            <property name="text">
+             <string>Recording Stop</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="screenShotButton">
+            <property name="text">
+             <string>Screen Shot</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item>
         <widget class="QWidget" name="roi_grid" native="true">
          <property name="minimumSize">

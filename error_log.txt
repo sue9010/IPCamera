@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "E:\Coding_practice\ipDataReceiver\thermalcam\cli.py", line 20, in <module>
+    viewer = OpenCVViewer()
+  File "E:\Coding_practice\ipDataReceiver\thermalcam\ui\main_window.py", line 126, in __init__
+    self.screenShotButton.clicked.connect(self.capture_screenshot)
+AttributeError: 'OpenCVViewer' object has no attribute 'screenShotButton'

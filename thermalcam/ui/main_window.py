@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QMainWindow,QMessageBox,QHBoxLayout, QSizePolicy 
+    QMainWindow,QMessageBox,QHBoxLayout, QSizePolicy
 )
 from PyQt5.QtCore import QTimer
 import os
@@ -24,7 +24,7 @@ from thermalcam.ui.roi_display_handler import init_roi_labels
 from thermalcam.ui.stream_handler import (
     start_stream, stop_stream, update_frame
 )
-from PyQt5.QtGui import QMovie
+from PyQt5.QtGui import QImage, QPixmap, QMovie, QTextCursor
 from PyQt5.QtWidgets import QLabel
 import os
 import time
@@ -33,6 +33,9 @@ from thermalcam.ui.dialogs.email_config import EmailConfigPopup
 from thermalcam.core.alarm import evaluate_alarms
 from thermalcam.ui.alarm_handlers import show_popup, play_sound, send_email
 from thermalcam.core.media_pipe import MediaPipePoseDetector
+import numpy as np
+import cv2
+
 
 DELAY_SEC = 1
 DEFAULT_IP   = "192.168.0.56"
@@ -120,6 +123,8 @@ class OpenCVViewer(QMainWindow):
         self.soundAlarmButton.clicked.connect(self.toggle_sound_alarm)
         self.emailAlarmButton.clicked.connect(self.toggle_email_alarm)
         self.emailConfigButton.clicked.connect(self.open_email_config_popup)
+        self.screenShotButton.clicked.connect(self.capture_screenshot)
+
 
         # 🔹 로딩 스피너 추가
         self.spinner = QLabel(self.video_label)
@@ -141,6 +146,37 @@ class OpenCVViewer(QMainWindow):
         self.update_button_states(False)
 
         init_roi_labels(self)
+
+    def capture_screenshot(self):
+        if not hasattr(self, "video_label") or self.video_label.pixmap() is None:
+            QMessageBox.warning(self, "오류", "저장할 영상이 없습니다.")
+            return
+
+        # QPixmap → QImage → numpy 배열
+        pixmap = self.video_label.pixmap()
+        image = pixmap.toImage()
+        image = image.convertToFormat(QImage.Format_RGB888)
+        width = image.width()
+        height = image.height()
+        ptr = image.bits()
+        ptr.setsize(image.byteCount())
+        arr = np.array(ptr).reshape(height, width, 3)
+
+        # 저장 경로 구성
+        desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+        capture_dir = os.path.join(desktop_path, "capture")
+        os.makedirs(capture_dir, exist_ok=True)  # ❗ 폴더 없으면 자동 생성
+
+        now = datetime.now()
+        filename = f"screenshot_{now.strftime('%Y%m%d_%H%M%S')}.jpg"
+        filepath = os.path.join(capture_dir, filename)
+
+        # 저장
+        cv2.imwrite(filepath, cv2.cvtColor(arr, cv2.COLOR_RGB2BGR))
+
+        # 로그 출력
+        self.log(f"[스크린샷 저장] {filepath}")
+
 
     def toggle_mediapipe_detection(self, checked):
         self.mediapipe_enabled = checked

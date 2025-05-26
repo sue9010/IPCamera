@@ -12,6 +12,8 @@ def resource_path(relative_path):
 
 class SuperResolution:
     def __init__(self, model_name='EDSR_x2.pb'):  # ← x4 → x2 로 변경
+    # def __init__(self, model_name='EDSR_x3.pb'):  
+    # def __init__(self, model_name='EDSR_x4.pb'):  
         self.model_path = resource_path(os.path.join("thermalcam", "resources", "models", model_name))
         print("[SR] 모델 경로:", self.model_path)
         assert os.path.exists(self.model_path), "❌ 모델 파일이 존재하지 않음!"

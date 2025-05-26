@@ -120,12 +120,25 @@ def update_frame(viewer):
         process_roi_display(viewer, rgb, scale_x, scale_y)
 
         person_present = False
-        if viewer.yolo_enabled:
-            from thermalcam.ui.yolo_handler import handle_yolo_detection
-            # YOLO 감지 (coords, confs, class_ids 포함)
+        if viewer.yolo_enabled and viewer.yolo_detector:
+            # YOLO 감지
             boxes, scores, class_ids = viewer.yolo_detector.detect(rgb)
-            if any(cls == 0 for cls in class_ids):  # class_id 0은 사람
+            
+            # 사람(class_id == 0)이 하나라도 있으면 True
+            if any(cls == 0 for cls in class_ids):
                 person_present = True
+
+                # 🔸 캡처 저장 시도
+                from thermalcam.ui.yolo_handler import save_capture
+                import datetime
+                now = datetime.datetime.now()
+
+                if not hasattr(viewer, "last_capture_time") or viewer.last_capture_time is None or \
+                   (now - viewer.last_capture_time).total_seconds() > 2:
+                    save_capture(rgb, now)
+                    viewer.last_capture_time = now
+
+            # YOLO 박스 그리기
             rgb = viewer.yolo_detector.draw_detections(rgb, (boxes, scores, class_ids))
 
         # 사람 있을 때만 MediaPipe 실행
