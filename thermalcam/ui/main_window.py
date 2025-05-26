@@ -1,40 +1,43 @@
-from PyQt5.QtWidgets import (
-    QMainWindow,QMessageBox,QHBoxLayout, QSizePolicy
-)
-from PyQt5.QtCore import QTimer
+# 🔹 표준 라이브러리
 import os
 import sys
-from PyQt5 import uic
-from PyQt5.QtGui import QTextCursor
+import time
+import importlib.resources
 from datetime import datetime
 
+# 🔹 외부 라이브러리
+import cv2
+import numpy as np
+
+from PyQt5 import uic
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QImage, QPixmap, QMovie, QTextCursor
+from PyQt5.QtWidgets import (
+    QMainWindow, QLabel, QMessageBox, QHBoxLayout, QSizePolicy
+)
+
+# 🔹 thermalcam.core
 from thermalcam.core.focus import FocusController
 from thermalcam.core.yolo import YOLODetector
+from thermalcam.core.alarm import evaluate_alarms
+from thermalcam.core.media_pipe import MediaPipePoseDetector
 
+# 🔹 thermalcam.ui.dialogs
 from thermalcam.ui.dialogs.ip_scanner import IPSelectorPopup
-from thermalcam.ui.graph_window import GraphWindow
+from thermalcam.ui.dialogs.email_config import EmailConfigPopup
 from thermalcam.ui.dialogs.camera_controls.image import ImageControlPopup
 from thermalcam.ui.dialogs.camera_controls.display import DisplayControlPopup
 from thermalcam.ui.dialogs.camera_controls.enhancement import EnhancementControlPopup
 from thermalcam.ui.dialogs.camera_controls.correction import CorrectionControlPopup
 from thermalcam.ui.dialogs.camera_controls.nuc import NUCControlPopup
 from thermalcam.ui.dialogs.roi_editor import SetROIPopup
-import importlib.resources   
+
+# 🔹 thermalcam.ui
+from thermalcam.ui.graph_window import GraphWindow
 from thermalcam.ui.roi_display_handler import init_roi_labels
-from thermalcam.ui.stream_handler import (
-    start_stream, stop_stream, update_frame
-)
-from PyQt5.QtGui import QImage, QPixmap, QMovie, QTextCursor
-from PyQt5.QtWidgets import QLabel
-import os
-import time
-from PyQt5.QtCore import Qt
-from thermalcam.ui.dialogs.email_config import EmailConfigPopup
-from thermalcam.core.alarm import evaluate_alarms
+from thermalcam.ui.stream_handler import start_stream, stop_stream, update_frame
 from thermalcam.ui.alarm_handlers import show_popup, play_sound, send_email
-from thermalcam.core.media_pipe import MediaPipePoseDetector
-import numpy as np
-import cv2
+
 
 
 DELAY_SEC = 1
@@ -90,6 +93,9 @@ class OpenCVViewer(QMainWindow):
         self.actionYolo.setCheckable(True)
         self.yolo_button.setCheckable(True)
 
+        self.is_recording = False
+        self.video_writer = None
+
         print("[Viewer] MediaPipe 속성 초기화")
         self.mediapipe_enabled = False
         self.pose_detector = None
@@ -124,7 +130,7 @@ class OpenCVViewer(QMainWindow):
         self.emailAlarmButton.clicked.connect(self.toggle_email_alarm)
         self.emailConfigButton.clicked.connect(self.open_email_config_popup)
         self.screenShotButton.clicked.connect(self.capture_screenshot)
-
+        self.recordingButton.clicked.connect(self.toggle_recording)
 
         # 🔹 로딩 스피너 추가
         self.spinner = QLabel(self.video_label)
@@ -146,6 +152,45 @@ class OpenCVViewer(QMainWindow):
         self.update_button_states(False)
 
         init_roi_labels(self)
+
+    def toggle_recording(self):
+        if not hasattr(self, "video_label") or self.video_label.pixmap() is None:
+            QMessageBox.warning(self, "오류", "영상이 없습니다.")
+            return
+
+        if not self.is_recording:
+            # ✅ 녹화 시작
+            desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+            capture_dir = os.path.join(desktop_path, "capture")
+            os.makedirs(capture_dir, exist_ok=True)
+
+            now = datetime.now()
+            filename = f"recording_{now.strftime('%Y%m%d_%H%M%S')}.avi"
+            self.recording_path = os.path.join(capture_dir, filename)
+
+            # QPixmap 크기 기준으로 해상도 추정
+            pixmap = self.video_label.pixmap()
+            width = pixmap.width()
+            height = pixmap.height()
+
+            # fourcc 및 VideoWriter 객체 생성
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            self.video_writer = cv2.VideoWriter(self.recording_path, fourcc, 20.0, (width, height))
+
+            self.is_recording = True
+            self.recordingButton.setText("Recording ON")
+            self.log(f"[녹화 시작] {self.recording_path}")
+
+        else:
+            # ✅ 녹화 종료
+            if self.video_writer:
+                self.video_writer.release()
+                self.video_writer = None
+
+            self.is_recording = False
+            self.recordingButton.setText("Recording Stop")
+            self.log(f"[녹화 저장 완료] {self.recording_path}")
+
 
     def capture_screenshot(self):
         if not hasattr(self, "video_label") or self.video_label.pixmap() is None:
@@ -330,6 +375,13 @@ class OpenCVViewer(QMainWindow):
             self.focusInButton,
             self.focusOutButton,
             self.yolo_button,
+            self.mediaPipeButton,
+            self.recordingButton,
+            self.screenShotButton,
+            self.popupAlarmButton,
+            self.soundAlarmButton,
+            self.emailAlarmButton,
+            self.emailConfigButton
         ]
 
         for widget in enable_when_disconnected:

@@ -29,6 +29,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QLineEdit" name="id_input">
+         <property name="text">
+          <string>admin</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLineEdit" name="pw_input">
          <property name="inputMethodHints">
           <set>Qt::ImhHiddenText|Qt::ImhNoAutoUppercase|Qt::ImhNoPredictiveText|Qt::ImhSensitiveData</set>
@@ -38,16 +48,6 @@
          </property>
          <property name="echoMode">
           <enum>QLineEdit::Password</enum>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="id_input">
-         <property name="text">
-          <string>admin</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>

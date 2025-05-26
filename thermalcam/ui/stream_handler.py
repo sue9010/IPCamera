@@ -101,7 +101,6 @@ def get_current_frame(viewer):
         return viewer.reader.get_delayed()
     return None
 
-
 def update_frame(viewer):
     frame = get_current_frame(viewer)
     if frame is not None:
@@ -130,8 +129,8 @@ def update_frame(viewer):
 
                 # 🔸 캡처 저장 시도
                 from thermalcam.ui.yolo_handler import save_capture
-                import datetime
-                now = datetime.datetime.now()
+                from datetime import datetime
+                now = datetime.now()
 
                 if not hasattr(viewer, "last_capture_time") or viewer.last_capture_time is None or \
                    (now - viewer.last_capture_time).total_seconds() > 2:
@@ -144,6 +143,11 @@ def update_frame(viewer):
         # 사람 있을 때만 MediaPipe 실행
         if viewer.mediapipe_enabled and viewer.pose_detector and person_present:
             rgb = viewer.pose_detector.detect_and_draw(rgb)
+
+        # ✅ 녹화 중이면 프레임 저장
+        if getattr(viewer, "is_recording", False) and viewer.video_writer is not None:
+            bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+            viewer.video_writer.write(bgr)
 
         # ✅ QLabel 크기에 맞게 QPixmap 리사이즈 (비율 유지)
         image = QImage(rgb.data, w, h, bytes_per_line, QImage.Format_RGB888)
